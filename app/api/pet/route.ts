@@ -161,8 +161,13 @@ export async function POST(req: Request) {
     return napResponse(400);
   }
 
-  // Require a name, same as the client-side gate.
-  const name = typeof body.name === "string" ? body.name.trim().slice(0, 24) : "";
+  // Require a name, same as the client-side gate. The name is interpolated
+  // into the system prompt, so collapse control chars (newlines, tabs) that
+  // would let it start its own prompt line.
+  const name =
+    typeof body.name === "string"
+      ? body.name.replace(/\p{Cc}/gu, " ").trim().slice(0, 24)
+      : "";
   if (!name) return napResponse(400);
 
   const page = typeof body.page === "string" ? body.page : null;
