@@ -31,6 +31,9 @@ export const IDLE_MIN_GAP = 6000;
 export const IDLE_MAX_GAP = 13000;
 export const IDLE_ANIM_MS = 1600;
 export const MISSED_AWAY_MS = 3 * 60 * 60 * 1000; // gone > 3h → "missed you"
+export const CHAT_MAX = 280; // matches the /api/pet route's MAX_INPUT
+export const SPEECH_MIN_MS = 4000;
+export const SPEECH_MAX_MS = 14000;
 
 export const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v));
@@ -175,6 +178,12 @@ export function petFace(
     case "bored":
       eyes = "( -_- )";
       break;
+    case "talking":
+      eyes = "( o.o )"; // listening
+      break;
+    case "thinking":
+      eyes = "( o.- )"; // thinking it over
+      break;
     default:
       // awake: mood shows in the eyes
       if (blink) eyes = "( -.- )";
@@ -183,4 +192,68 @@ export function petFace(
       else eyes = "( o.o )";
   }
   return { ears, eyes, paws, tag, bubble };
+}
+
+// Reading time for a reply bubble, scaled by length.
+export const speechMs = (text: string) =>
+  clamp(text.length * 90, SPEECH_MIN_MS, SPEECH_MAX_MS);
+
+// chat (talks to /api/pet)
+// Shared by both pets so the request contract lives in one place and can't drift.
+export const CHAT_WINDOW = 6; // how many recent messages we send as context
+export const CHAT_KEEP = 12; // how many we keep locally; only the last window is sent
+
+export type ChatMsg = { role: "user" | "assistant"; content: string };
+
+// Full conversation for the transcript panel either pet can open. Module state,
+// so it's in-memory only and resets on reload; intentionally not persisted, and
+// separate from the bounded window we send the model. Kept here so both pets
+// show the same running conversation.
+const sessionTranscript: ChatMsg[] = [];
+export const transcript = (): readonly ChatMsg[] => sessionTranscript;
+export const pushTranscript = (msg: ChatMsg) => sessionTranscript.push(msg);
+
+// POST the recent window to /api/pet and stream the reply back. On success the
+// route streams plain text; on error it returns the same plain-text body (a
+// "nap" line) with a non-2xx status, so we read every response the same way.
+// onChunk fires with the accumulated text as it grows (use it to drive the
+// speech bubble). page is the visitor's pathname, for page-aware replies.
+// Returns the final text and whether it's a real answer worth remembering.
+export type PetSurface = "terminal" | "corner";
+
+export async function talkToPet(
+  name: string,
+  history: ChatMsg[],
+  opts: { page?: string | null; surface?: PetSurface; onChunk?: (full: string) => void } = {},
+): Promise<{ text: string; remember: boolean }> {
+  try {
+    const res = await fetch("/api/pet", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name,
+        page: opts.page ?? null,
+        surface: opts.surface ?? null,
+        messages: history.slice(-CHAT_WINDOW),
+      }),
+    });
+    const reader = res.body?.getReader();
+    if (!reader) {
+      const t = (await res.text().catch(() => "")).trim();
+      return { text: t || "…?", remember: res.ok && !!t };
+    }
+    const decoder = new TextDecoder();
+    let full = "";
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      full += decoder.decode(value, { stream: true });
+      opts.onChunk?.(full);
+    }
+    full = (full + decoder.decode()).trim();
+    if (full) opts.onChunk?.(full);
+    return { text: full || "…?", remember: res.ok && !!full };
+  } catch {
+    return { text: "(couldn’t reach me — try again)", remember: false };
+  }
 }
