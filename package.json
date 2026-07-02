@@ -9,8 +9,10 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/groq": "^3.0.42",
     "@iconify-icons/mdi": "1.2.48",
     "@iconify/react": "^6.0.2",
+    "ai": "^6.0.208",
     "gray-matter": "^4.0.3",
     "next": "16.2.7",
     "next-mdx-remote": "^6.0.0",
