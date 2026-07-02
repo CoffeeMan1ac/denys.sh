@@ -1,0 +1,137 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #18181b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+}
+
+/* Disable overscroll. */
+html {
+  overscroll-behavior-y: none;
+  background: var(--background);
+  color: var(--foreground);
+}
+
+body {
+  color: var(--foreground);
+}
+
+/* Brand prompt caret (BrandPrompt.tsx). Applied via @apply in an authored rule
+   (not the bare utility class in markup) so Tailwind reliably keeps the
+   brand-cursor-blink keyframes instead of tree-shaking them. */
+.brand-caret {
+  @apply animate-brand-cursor-blink;
+}
+
+/* Page-switch transition registered as a Tailwind animation utility. Because
+   the `animate-page-fade-in` utility is used in template.tsx, Tailwind emits it
+   and keeps the keyframes (plain authored @keyframes get tree-shaken away). */
+@theme {
+  --animate-page-fade-in: page-fade-in 0.35s ease-out;
+
+  @keyframes page-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Brand prompt caret: holds steady while a page name types out, then blinks
+     when idle (BrandPrompt.tsx toggles the .brand-caret class). Pulled in by
+     the .brand-caret rule above via @apply, which keeps these keyframes from
+     being tree-shaken. */
+  --animate-brand-cursor-blink: brand-cursor-blink 1s step-end infinite;
+
+  @keyframes brand-cursor-blink {
+    0%,
+    50% {
+      opacity: 1;
+    }
+    50.01%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  /* Ambient pet particles. Used via animate-pet-fall / animate-pet-twinkle on
+     the Pet's particle layer, which keeps these keyframes from being shaken.
+     Per-particle duration is set inline. */
+  --animate-pet-fall: pet-fall 6s linear forwards;
+  --animate-pet-twinkle: pet-twinkle 2s ease-in-out forwards;
+
+  @keyframes pet-fall {
+    0% {
+      top: -8%;
+      opacity: 0;
+    }
+    12%,
+    88% {
+      opacity: 0.85;
+    }
+    100% {
+      top: 108%;
+      opacity: 0;
+    }
+  }
+
+  @keyframes pet-twinkle {
+    0%,
+    100% {
+      opacity: 0;
+      transform: scale(0.6);
+    }
+    50% {
+      opacity: 0.9;
+      transform: scale(1);
+    }
+  }
+}
+
+/* Minimal MDX content styles (avoids pulling in the typography plugin). */
+.prose {
+  line-height: 1.7;
+}
+.prose h1 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+}
+.prose h2 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+.prose p {
+  margin: 1rem 0;
+}
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose ul,
+.prose ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+  list-style: revert;
+}
+.prose li {
+  margin: 0.25rem 0;
+}
+.prose strong {
+  font-weight: 600;
+}
+.prose em {
+  font-style: italic;
+}
