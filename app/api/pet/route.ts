@@ -48,6 +48,28 @@ const napResponse = (status: number) =>
 type Role = "user" | "assistant";
 type Msg = { role: Role; content: string };
 
+// Read the body with a hard byte cap, returning null once it exceeds
+// MAX_BODY_BYTES. The cap has to sit on the actual stream: Content-Length is
+// absent on chunked requests (and client-controlled anyway), and req.json()
+// would buffer the whole body before we could check anything.
+async function readBody(req: Request): Promise<string | null> {
+  const reader = req.body?.getReader();
+  if (!reader) return "";
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > MAX_BODY_BYTES) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf8");
+}
+
 // ip -> recent request timestamps. Per-process and resets on restart, and each
 // serverless instance has its own copy, so this is only a best-effort local
 // guard: the durable, shared limit has to live at the edge (Cloudflare/WAF).
@@ -125,14 +147,16 @@ export async function POST(req: Request) {
   // scripts, not a determined attacker; the durable limit lives at the edge.
   if (req.headers.get("origin") !== ALLOWED_ORIGIN) return napResponse(403);
 
-  // Reject oversized bodies before parsing one into memory. Content is
-  // truncated to MAX_INPUT below regardless, so this is purely a memory guard.
-  if (Number(req.headers.get("content-length") ?? 0) > MAX_BODY_BYTES)
-    return napResponse(413);
+  // Memory guard only: content is truncated to MAX_INPUT below regardless.
+  const rawBody = await readBody(req);
+  if (rawBody === null) return napResponse(413);
 
   let body: { name?: unknown; messages?: unknown; page?: unknown; surface?: unknown };
   try {
-    body = await req.json();
+    const parsed: unknown = JSON.parse(rawBody);
+    // JSON.parse also yields primitives ("null", "42"); require an object.
+    if (!parsed || typeof parsed !== "object") return napResponse(400);
+    body = parsed;
   } catch {
     return napResponse(400);
   }
