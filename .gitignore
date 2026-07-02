@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local Chrome for Lighthouse (not committed)
 /chrome
+
+# resume PDF is placed per deployment, never committed
+/public/Denys-Resume.pdf
