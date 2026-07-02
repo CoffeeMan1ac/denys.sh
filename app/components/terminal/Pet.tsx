@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import * as pet from "@/lib/pet/core";
 
 // A tiny ASCII companion inside the terminal. Mood decays when ignored and
 // recovers when booped, it's livelier by day and dozier at night, does small
@@ -179,6 +180,13 @@ const FLASH_MS = 700; // block-complete screen flash
 const SHUSH_MS = 1000; // "not now" rebuff when booped mid-work
 const FOCUS_CATCHUP_CAP = 16; // phases to reconstruct on resume before giving up
 
+// chat (talks to /api/pet)
+const CHAT_MAX = 280; // matches the route's MAX_INPUT
+const SPEECH_MIN_MS = 4000; // how long a reply lingers (scaled by length)
+const SPEECH_MAX_MS = 14000;
+// CHAT_WINDOW / CHAT_KEEP / ChatMsg + the request live in lib/pet/core (pet.*),
+// so both pets share one contract.
+
 const phaseMinutes = (c: FocusConfig, p: FocusPhase) =>
   p === "work" ? c.workMin : p === "short" ? c.shortMin : c.longMin;
 const phaseLabel = (p: FocusPhase) =>
@@ -261,9 +269,38 @@ export default function Pet({
     if (setupActive) setupPanelRef.current?.focus();
   }, [setupActive]);
 
+  // Chat: a text input that POSTs to /api/pet; the reply shows in a speech
+  // bubble above the pet. `pending` is the "thinking" beat in between.
+  const [talking, setTalking] = useState(false);
+  const [chatDraft, setChatDraft] = useState("");
+  const [pending, setPending] = useState(false);
+  const [speech, setSpeech] = useState<{ text: string; until: number } | null>(null);
+  const [showLog, setShowLog] = useState(false); // the session transcript panel
+  const chatInputRef = useRef<HTMLInputElement>(null);
+  const logRef = useRef<HTMLDivElement>(null); // transcript scroll container
+  const aliveRef = useRef(true); // guards async setState after unmount
+  useEffect(() => {
+    aliveRef.current = true; // re-arm on (re)mount; StrictMode runs cleanup once
+    return () => {
+      aliveRef.current = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (talking) chatInputRef.current?.focus();
+  }, [talking]);
+  // Keep the transcript scrolled to the newest line while it's open or grows.
+  const transcriptLen = pet.transcript().length;
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [showLog, transcriptLen]);
+
   const [name, setName] = useState("");
   const [naming, setNaming] = useState(false);
   const [draft, setDraft] = useState("");
+
+  // Bounded conversation memory; the server stays stateless.
+  const chatLog = useRef<pet.ChatMsg[]>([]);
 
   // Refs mirroring state, so interval closures read current values, not stale ones.
   const nameRef = useRef("");
@@ -722,6 +759,65 @@ export default function Pet({
     }
   }
 
+  // chat helpers
+  function showSpeech(text: string) {
+    const ms = clamp(text.length * 90, SPEECH_MIN_MS, SPEECH_MAX_MS);
+    setSpeech({ text, until: Date.now() + ms });
+    lastInteraction.current = Date.now();
+  }
+  async function sendMessage(raw: string) {
+    const msg = raw.trim().slice(0, CHAT_MAX);
+    if (!msg || pending) return;
+    setChatDraft("");
+    setTalking(false);
+    setSpeech(null);
+    setPending(true);
+    lastInteraction.current = Date.now();
+    rootRef.current?.focus();
+    pet.pushTranscript({ role: "user", content: msg }); // transcript, display only
+
+    // Add the question to the running history; talkToPet sends only the recent window.
+    const history: pet.ChatMsg[] = [...chatLog.current, { role: "user", content: msg }];
+    try {
+      const { text, remember } = await pet.talkToPet(nameRef.current, history, {
+        surface: "terminal",
+        onChunk: (full) => {
+          if (!aliveRef.current) return;
+          setPending(false); // first token: drop the thinking dots
+          // Keep the bubble up while streaming; showSpeech sets the real fade timer after.
+          setSpeech({ text: full, until: Date.now() + 60_000 });
+        },
+      });
+      if (!aliveRef.current) return;
+      // Only remember turns the model actually answered (skip naps/errors) so a
+      // failed exchange doesn't poison the context.
+      if (remember) {
+        chatLog.current = [
+          ...history,
+          { role: "assistant" as const, content: text },
+        ].slice(-pet.CHAT_KEEP);
+      }
+      pet.pushTranscript({ role: "assistant", content: text });
+      showSpeech(text);
+    } finally {
+      if (aliveRef.current) setPending(false);
+    }
+  }
+  function onChatKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    e.stopPropagation(); // keep keys out of the pet's own handler
+    if (e.key === "Escape" || (e.ctrlKey && e.key === "c")) {
+      e.preventDefault();
+      setTalking(false);
+      setChatDraft("");
+      rootRef.current?.focus();
+      return;
+    }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      void sendMessage(chatDraft);
+    }
+  }
+
   // interactions
   function registerBoop(now: number) {
     recentBoops.current = recentBoops.current.filter((t) => now - t < OVERSTIM_WINDOW);
@@ -830,6 +926,16 @@ export default function Pet({
     }
 
     // normal pet mode
+    if (showLog && e.key === "Escape") {
+      e.preventDefault();
+      setShowLog(false);
+      return;
+    }
+    if (e.key === "l" && pet.transcript().length) {
+      e.preventDefault();
+      setShowLog((v) => !v);
+      return;
+    }
     if (e.ctrlKey && e.key === "c") {
       e.preventDefault();
       onExit();
@@ -846,6 +952,14 @@ export default function Pet({
     //   setSetup({ task: "", ...FOCUS_DEFAULTS, field: 0 });
     //   return;
     // }
+    if (e.key === "t" && name) {
+      // Talking needs a name (the route requires one), so `t` only works once
+      // named; otherwise it falls through to a normal wake.
+      e.preventDefault();
+      setSpeech(null);
+      setTalking(true);
+      return;
+    }
     if (e.key === "n") {
       e.preventDefault();
       setDraft(name);
@@ -903,6 +1017,8 @@ export default function Pet({
 
   let phase: string;
   if (naming) phase = "awake";
+  else if (talking) phase = "talking";
+  else if (pending) phase = "thinking";
   else if (confirmQuit) phase = "cry";
   else if (focusRef.current) {
     const f = focusRef.current;
@@ -1031,6 +1147,12 @@ export default function Pet({
       eyes = "( ╥﹏╥ )";
       bubble = { text: "  ;", tone: "text-sky-400" };
       break;
+    case "talking":
+      eyes = "( o.o )"; // listening
+      break;
+    case "thinking":
+      eyes = "( o.- )"; // thinking it over (the bubble shows the typing dots)
+      break;
     default:
       // awake: mood shows in the eyes
       if (blink) eyes = "( -.- )";
@@ -1080,13 +1202,20 @@ export default function Pet({
   }
   const flashAmt = flashUntil.current > now ? (flashUntil.current - now) / FLASH_MS : 0;
 
+  // Speech bubble: the typing beat while pending, then the reply until it fades.
+  // Mutually exclusive with the transcript panel; never both at once.
+  const showBubble = !showLog && (pending || (!!speech && now < speech.until));
+  const bubbleText = pending
+    ? ".".repeat((Math.floor(now / 350) % 3) + 1)
+    : (speech?.text ?? "");
+
   return (
     <div
       ref={rootRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onClick={() => {
-        if (naming || setupActive) return; // let inputs keep the keyboard
+        if (naming || setupActive || talking) return; // let inputs keep the keyboard
         rootRef.current?.focus();
       }}
       className="relative flex h-full flex-col items-center justify-center overflow-hidden bg-white font-mono text-[17px] leading-tight text-zinc-800 outline-none"
@@ -1177,6 +1306,13 @@ export default function Pet({
         className="flex flex-col items-center"
         style={{ transform: `translateX(${hop}px)` }}
       >
+        {/* Speech bubble: the pet's reply (or the thinking dots) sits above it. */}
+        {showBubble && (
+          <div className="mb-2 max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm">
+            {bubbleText}
+          </div>
+        )}
+
         {/* bubble row (reserved so the creature doesn't jump) */}
         <div className={`h-5 whitespace-pre ${bubble?.tone ?? ""}`}>
           {bubble?.text ?? ""}
@@ -1265,23 +1401,90 @@ export default function Pet({
         </span>
       )}
 
-      {!setup && !naming && (
-        <div className="mt-8 select-none text-center text-sm text-zinc-400">
-          {confirmQuit && session ? (
-            <span>
-              leave “{session.config.task}”? this block isn’t done ·{" "}
-              <span className="text-zinc-600">y</span> /{" "}
-              <span className="text-zinc-600">n</span>
-            </span>
-          ) : session ? (
-            <span>
-              p: {session.paused ? "resume" : "pause"} · s: skip · r: reset · q: quit
-            </span>
-          ) : (
-            <span>space: boop{!name ? " · n: name" : ""} · q: quit</span>
-          )}
+      {/* Session transcript: everything said this load. In-memory only, gone on
+          reload. Esc or `l` closes it. */}
+      {showLog && transcriptLen > 0 && (
+        <div
+          ref={logRef}
+          className="absolute inset-x-4 top-4 bottom-12 z-20 overflow-y-auto rounded-lg border border-zinc-200 bg-white/95 p-3 text-left text-sm leading-relaxed shadow-sm"
+        >
+          {pet.transcript().map((m, i) => (
+            <p key={i} className={i ? "mt-1.5" : ""}>
+              <span className={m.role === "user" ? "text-zinc-400" : "text-emerald-700"}>
+                {m.role === "user" ? "you" : name || "pet"}:{" "}
+              </span>
+              <span className="whitespace-pre-wrap break-words text-zinc-700">
+                {m.content}
+              </span>
+            </p>
+          ))}
+          <div className="sticky bottom-0 mt-2 bg-white/95 pt-1 text-center text-xs text-zinc-400">
+            esc · l to close
+          </div>
         </div>
       )}
+
+      {!setup &&
+        !naming &&
+        (talking ? (
+          <div className="mt-8 flex items-center gap-2 text-sm">
+            <span className="text-zinc-400">{">"}</span>
+            <input
+              ref={chatInputRef}
+              value={chatDraft}
+              onChange={(e) => setChatDraft(e.target.value)}
+              onKeyDown={onChatKeyDown}
+              onBlur={() => {
+                // Talking follows focus: on blur (click the pet or away) leave
+                // talk mode and hand the keyboard back to the pet so boop / q /
+                // etc. work again.
+                setTalking(false);
+                setChatDraft("");
+              }}
+              maxLength={CHAT_MAX}
+              placeholder="say something…"
+              spellCheck={false}
+              aria-label="Talk to your pet"
+              className="w-64 bg-transparent text-zinc-800 outline-none placeholder:text-zinc-300"
+            />
+            <span className="select-none text-zinc-300">enter · esc</span>
+          </div>
+        ) : (
+          <div className="mt-8 select-none text-center text-sm text-zinc-400">
+            {confirmQuit && session ? (
+              <span>
+                leave “{session.config.task}”? this block isn’t done ·{" "}
+                <span className="text-zinc-600">y</span> /{" "}
+                <span className="text-zinc-600">n</span>
+              </span>
+            ) : session ? (
+              <span>
+                p: {session.paused ? "resume" : "pause"} · s: skip · r: reset · q: quit
+              </span>
+            ) : (
+              <span>
+                space: boop{!name ? " · n: name" : " · t: talk"} · q: quit
+                {transcriptLen > 0 && (
+                  <>
+                    {" · "}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowLog((v) => !v);
+                        rootRef.current?.focus(); // keep the keyboard on the pet
+                      }}
+                      aria-expanded={showLog}
+                      className="text-zinc-500 transition-colors hover:text-zinc-700"
+                    >
+                      {showLog ? "▾" : "▸"} log
+                    </button>
+                  </>
+                )}
+              </span>
+            )}
+          </div>
+        ))}
     </div>
   );
 }
