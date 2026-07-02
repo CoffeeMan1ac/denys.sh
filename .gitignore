@@ -45,3 +45,6 @@ next-env.d.ts
 
 # resume PDF is placed per deployment, never committed
 /public/Denys-Resume.pdf
+
+# writing PDFs are placed per deployment, never committed
+/public/Applied_Probability_Report.pdf
