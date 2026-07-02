@@ -47,7 +47,11 @@ export default function CornerPet() {
   const [, setTick] = useState(0);
 
   // Pinned to the bottom of the viewport, but lifts above the footer once it
-  // scrolls in, so the pet sits on its top edge.
+  // scrolls in, so the pet sits on its top edge. This component persists across
+  // navigation, so besides scroll/resize we watch the body with a ResizeObserver
+  // (catches the page-height change on a route swap and late font/image reflow)
+  // and re-sync on pathname change. Without that the offset goes stale after a
+  // client-side nav and the pet lands inside the footer until the next scroll.
   useEffect(() => {
     const footer = document.getElementById("site-footer");
     if (!footer) return;
@@ -57,18 +61,21 @@ export default function CornerPet() {
       const overlap = window.innerHeight - footer.getBoundingClientRect().top;
       setLift(overlap > 0 ? overlap : 0);
     };
-    const onScroll = () => {
+    const schedule = () => {
       if (!raf) raf = window.requestAnimationFrame(update);
     };
     update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    const ro = new ResizeObserver(schedule);
+    ro.observe(document.body);
     return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      ro.disconnect();
       if (raf) window.cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [pathname]);
 
   // Load the stored name/mood from localStorage. On the page's first load
   // (initial), a gap since lastSeen over MISSED_AWAY_MS shows the "missed you"
