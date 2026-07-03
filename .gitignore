@@ -32,6 +32,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -48,3 +49,6 @@ next-env.d.ts
 
 # writing PDFs are placed per deployment, never committed
 /public/Applied_Probability_Report.pdf
+
+# the pet's real knowledge stays out of git; copy knowledge.example.ts and fill in
+/lib/pet/knowledge.ts
