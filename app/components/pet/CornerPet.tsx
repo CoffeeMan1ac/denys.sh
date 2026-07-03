@@ -55,6 +55,8 @@ export default function CornerPet() {
   const [lift, setLift] = useState(0); // px to lift so we don't overlap the footer
   const [isMobile, setIsMobile] = useState(false); // below sm: launcher button + sheet
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sheetDragY, setSheetDragY] = useState(0); // grab handle: px dragged down
+  const sheetDragRef = useRef<number | null>(null); // pointer's start Y
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -298,12 +300,29 @@ export default function CornerPet() {
     el.style.height = `${el.scrollHeight}px`;
   }, [chatDraft]);
 
-  // Keep the transcript scrolled to the newest line while it's open or grows.
+  // Keep the transcript scrolled to the newest line while it's open or grows
+  // (on phones that includes the live row streaming in via `speech`).
   const turns = pet.transcript().length;
   useEffect(() => {
     const el = logRef.current;
     if (el) el.scrollTop = el.scrollHeight;
-  }, [showLog, turns]);
+  }, [showLog, turns, sheetOpen, pending, speech]);
+
+  // Grab handle: drag the sheet down to close it.
+  function onHandleDown(e: React.PointerEvent<HTMLDivElement>) {
+    sheetDragRef.current = e.clientY;
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  function onHandleMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (sheetDragRef.current === null) return;
+    setSheetDragY(Math.max(0, e.clientY - sheetDragRef.current));
+  }
+  function onHandleUp() {
+    if (sheetDragRef.current === null) return;
+    sheetDragRef.current = null;
+    if (sheetDragY > 80) setSheetOpen(false);
+    setSheetDragY(0);
+  }
 
   // One at a time: stay hidden while the pet shows in the terminal.
   if (!hydrated || claimed) return null;
@@ -385,13 +404,22 @@ export default function CornerPet() {
     ? ".".repeat((Math.floor(now / 350) % 3) + 1)
     : (speech?.text ?? "");
 
-  // Session transcript: everything said this page load. In-memory only,
-  // gone on reload.
-  const transcriptPanel = showLog && turns > 0 && (
+  // On phones the reply streams straight into the transcript as a live row
+  // (it only becomes a real entry once the reply finishes), so the sheet needs
+  // no reply bubble.
+  const liveRow =
+    isMobile &&
+    (pending || (!!speech && now < speech.until)) &&
+    pet.transcript().at(-1)?.role === "user";
+
+  // Session transcript: everything said this page load. In-memory only, gone on
+  // reload. Behind the arrow toggle on desktop; always visible in the sheet,
+  // where it grows with the conversation and scrolls once the sheet is full.
+  const transcriptPanel = (isMobile ? turns > 0 || liveRow : showLog && turns > 0) && (
     <div
       ref={logRef}
-      className={`max-h-48 overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800 ${
-        isMobile ? "w-full" : "w-56"
+      className={`overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800 ${
+        isMobile ? "min-h-0 w-full" : "max-h-48 w-56"
       }`}
     >
       {pet.transcript().map((m, i) => (
@@ -404,6 +432,14 @@ export default function CornerPet() {
           </span>
         </p>
       ))}
+      {liveRow && (
+        <p className={turns ? "mt-1.5" : ""}>
+          <span className="text-zinc-500">{name}: </span>
+          <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
+            {bubbleText}
+          </span>
+        </p>
+      )}
     </div>
   );
 
@@ -433,7 +469,7 @@ export default function CornerPet() {
           isMobile ? "w-64" : "w-40"
         }`}
       />
-      {turns > 0 && (
+      {!isMobile && turns > 0 && (
         <button
           type="button"
           onClick={() => setShowLog((v) => !v)}
@@ -506,14 +542,27 @@ export default function CornerPet() {
             onClick={() => setSheetOpen(false)}
           />
           <div
-            className={`absolute inset-x-0 bottom-0 flex flex-col items-center gap-2 rounded-t-2xl border-t border-zinc-200 bg-white px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 font-mono text-zinc-700 shadow-2xl transition-transform duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
-              sheetOpen ? "translate-y-0" : "translate-y-full"
-            }`}
+            style={sheetDragY ? { transform: `translateY(${sheetDragY}px)` } : undefined}
+            className={`absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col items-center gap-2 rounded-t-2xl border-t border-zinc-200 bg-white px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-1.5 font-mono text-zinc-700 shadow-2xl ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
+              sheetDragY ? "" : "transition-transform duration-200"
+            } ${sheetOpen ? "translate-y-0" : "translate-y-full"}`}
           >
+            {/* Grab handle: drag down to close. */}
+            <div
+              onPointerDown={onHandleDown}
+              onPointerMove={onHandleMove}
+              onPointerUp={onHandleUp}
+              onPointerCancel={onHandleUp}
+              className="flex w-full shrink-0 cursor-grab touch-none justify-center py-1.5"
+            >
+              <span
+                aria-hidden
+                className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700"
+              />
+            </div>
             {transcriptPanel}
-            {bubble}
-            {figure}
-            {talkRow}
+            <div className="shrink-0">{figure}</div>
+            <div className="shrink-0">{talkRow}</div>
           </div>
         </div>
       </>
