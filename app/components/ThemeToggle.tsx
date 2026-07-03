@@ -1,11 +1,29 @@
 "use client";
 
+import { useEffect } from "react";
 import { Icon } from "@/app/components/Icon";
 
 // Sun/moon switch in the header nav. Stateless on purpose: which icon shows is
 // decided by CSS (dark:) off <html data-theme>, so the server markup never
 // disagrees with the theme the inline head script applied before hydration.
 export default function ThemeToggle() {
+  // The head script senses the system theme at load; this follows OS theme
+  // flips while the page is open, until the user has made an explicit choice.
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = (e: MediaQueryListEvent) => {
+      try {
+        if (localStorage.getItem("theme")) return;
+      } catch {}
+      document.documentElement.setAttribute(
+        "data-theme",
+        e.matches ? "dark" : "light",
+      );
+    };
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
+
   function toggle() {
     const root = document.documentElement;
     const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
