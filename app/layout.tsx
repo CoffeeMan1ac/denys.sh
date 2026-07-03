@@ -17,6 +17,7 @@ import {
   FULL_NAME,
   KEYWORDS,
   THEME_COLOR,
+  THEME_COLOR_DARK,
 } from "@/lib/site";
 
 const inter = Inter({
@@ -77,8 +78,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: THEME_COLOR,
-  colorScheme: "light",
+  // Follows the system preference; the toggle's choice can't reach a meta tag.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR },
+    { media: "(prefers-color-scheme: dark)", color: THEME_COLOR_DARK },
+  ],
 };
 
 export default function RootLayout({
@@ -87,8 +91,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
-      <body className="flex min-h-full flex-col font-sans text-zinc-900">
+    <html
+      lang="en"
+      className={`${inter.variable} h-full antialiased`}
+      data-theme="light"
+      // The head script below may flip data-theme before hydration; keep the
+      // DOM's value (see the "Preventing Flash" guide in the Next.js docs).
+      suppressHydrationWarning
+    >
+      <head>
+        {/* Runs during HTML parsing, before first paint: saved choice first,
+            otherwise the system preference. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme");if(t==="dark"||(!t&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark")}catch(e){}})()`,
+          }}
+        />
+      </head>
+      <body className="flex min-h-full flex-col font-sans text-zinc-900 dark:text-zinc-100">
         <StructuredData />
         <TerminalProvider>
           <Header />

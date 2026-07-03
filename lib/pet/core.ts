@@ -129,33 +129,33 @@ export function petFace(
   switch (phase) {
     case "missed":
       eyes = "( ^o^ )";
-      tag = { text: "missed you!", tone: "text-emerald-600" };
+      tag = { text: "missed you!", tone: "text-emerald-600 dark:text-emerald-400" };
       bubble = { text: "  ♥", tone: "text-pink-500" };
       break;
     case "dizzy":
       eyes = "( @_@ )";
-      tag = { text: "~grr", tone: "text-amber-600" };
+      tag = { text: "~grr", tone: "text-amber-600 dark:text-amber-400" };
       break;
     case "special":
       eyes = "( *o* )";
-      tag = { text: "✧!", tone: "text-violet-600" };
+      tag = { text: "✧!", tone: "text-violet-600 dark:text-violet-400" };
       bubble = { text: "✦ ✧ ✦", tone: "text-violet-500" };
       break;
     case "booped": {
       const r = BOOP_REACTIONS[reaction];
       eyes = r.eyes;
-      tag = { text: r.tag, tone: "text-emerald-600" };
+      tag = { text: r.tag, tone: "text-emerald-600 dark:text-emerald-400" };
       bubble = { text: "  ♥   ♥", tone: "text-pink-500" };
       break;
     }
     case "startled":
       eyes = "( O.O )";
-      tag = { text: "!", tone: "text-amber-600" };
+      tag = { text: "!", tone: "text-amber-600 dark:text-amber-400" };
       break;
     case "idle-yawn":
       eyes = "( o3o )";
       tag = { text: "~yawn", tone: "text-zinc-400" };
-      bubble = { text: "  o", tone: "text-zinc-300" };
+      bubble = { text: "  o", tone: "text-zinc-300 dark:text-zinc-600" };
       break;
     case "idle-stretch":
       eyes = "( =_= )";

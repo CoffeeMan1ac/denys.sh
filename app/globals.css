@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
+/* dark: keys off the data-theme attribute (set before paint by the inline
+   script in layout.tsx), not prefers-color-scheme, so the toggle wins. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 :root {
   --background: #ffffff;
   --foreground: #18181b;
+}
+
+[data-theme="dark"] {
+  --background: #0b0b0d;
+  --foreground: #f4f4f5;
 }
 
 @theme inline {
@@ -16,6 +25,11 @@ html {
   overscroll-behavior-y: none;
   background: var(--background);
   color: var(--foreground);
+  color-scheme: light;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 body {

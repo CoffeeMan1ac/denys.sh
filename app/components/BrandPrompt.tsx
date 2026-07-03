@@ -98,7 +98,7 @@ export default function BrandPrompt() {
       <span
         aria-hidden
         className={
-          "ml-1 inline-block h-[1.05em] w-[0.55em] translate-y-[0.12em] bg-zinc-400" +
+          "ml-1 inline-block h-[1.05em] w-[0.55em] translate-y-[0.12em] bg-zinc-400 dark:bg-zinc-500" +
           (done ? " brand-caret" : "") // solid while typing, blink when done
         }
       />

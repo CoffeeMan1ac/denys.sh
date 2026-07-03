@@ -3,6 +3,7 @@
 import Link from "next/link";
 import TerminalTrigger from "./terminal/TerminalTrigger";
 import BrandPrompt from "./BrandPrompt";
+import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
   { href: "/showcase", label: "Showcase" },
@@ -27,13 +28,18 @@ export default function Header() {
         >
           <BrandPrompt />
         </Link>
-        <nav className="flex flex-wrap justify-end gap-x-4 gap-y-1 text-xl text-zinc-600">
+        <nav className="flex flex-wrap justify-end gap-x-4 gap-y-1 text-xl text-zinc-600 dark:text-zinc-400">
           {navLinks.map((link) => (
-            <Link key={link.href} href={link.href} className="hover:text-black">
+            <Link
+              key={link.href}
+              href={link.href}
+              className="hover:text-black dark:hover:text-white"
+            >
               {link.label}
             </Link>
           ))}
           <TerminalTrigger variant="nav" />
+          <ThemeToggle />
         </nav>
       </div>
     </header>

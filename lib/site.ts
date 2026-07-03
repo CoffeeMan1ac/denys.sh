@@ -38,7 +38,9 @@ export const KEYWORDS = [
 ];
 
 // Brand colors, shared by the manifest and the theme-color meta tag.
+// THEME_COLOR_DARK matches --background in globals.css for [data-theme="dark"].
 export const THEME_COLOR = "#ffffff";
+export const THEME_COLOR_DARK = "#0b0b0d";
 export const ICON_BG = "#18181b";
 export const ICON_FG = "#fafafa";
 

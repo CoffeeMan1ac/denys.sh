@@ -16,9 +16,9 @@ import Pet from "./Pet";
 function Prompt({ path }: { path: string }) {
   return (
     <span className="shrink-0 whitespace-pre">
-      <span className="text-emerald-700">guest@denys.sh</span>
+      <span className="text-emerald-700 dark:text-emerald-400">guest@denys.sh</span>
       <span className="text-zinc-400">:</span>
-      <span className="text-sky-700">{path}</span>
+      <span className="text-sky-700 dark:text-sky-400">{path}</span>
       <span className="text-zinc-400">$ </span>
     </span>
   );
@@ -261,7 +261,7 @@ export default function TerminalView() {
         if (window.getSelection()?.toString()) return;
         inputRef.current?.focus();
       }}
-      className="h-full overflow-y-auto overscroll-contain bg-white px-3 py-2 font-mono text-[15px] leading-relaxed text-zinc-800"
+      className="h-full overflow-y-auto overscroll-contain bg-white px-3 py-2 font-mono text-[15px] leading-relaxed text-zinc-800 dark:bg-zinc-950 dark:text-zinc-200"
     >
       {lines.map((line) => {
         if (line.type === "command") {
@@ -281,7 +281,7 @@ export default function TerminalView() {
               <button
                 type="button"
                 onClick={() => requestType("pet", true)}
-                className="text-emerald-700 underline-offset-2 hover:underline"
+                className="text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
               >
                 pet
               </button>{" "}
@@ -321,7 +321,7 @@ export default function TerminalView() {
             autoCapitalize="off"
             autoCorrect="off"
             aria-label="Terminal input"
-            className="absolute inset-0 resize-none overflow-hidden whitespace-pre-wrap break-words border-0 bg-transparent p-0 font-mono text-[15px] leading-relaxed text-transparent caret-zinc-800 outline-none"
+            className="absolute inset-0 resize-none overflow-hidden whitespace-pre-wrap break-words border-0 bg-transparent p-0 font-mono text-[15px] leading-relaxed text-transparent caret-zinc-800 outline-none dark:caret-zinc-200"
           />
         </div>
       </div>

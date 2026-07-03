@@ -43,7 +43,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 
 function Tag({ children }: { children: React.ReactNode }) {
   return (
-    <span className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs text-zinc-600">
+    <span className="rounded-full border border-zinc-200 px-2.5 py-0.5 text-xs text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
       {children}
     </span>
   );
@@ -62,8 +62,8 @@ function GhostCover({
 }) {
   return (
     <div className="relative aspect-[16/10] overflow-hidden rounded-lg">
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-100 to-zinc-200 transition-transform duration-500 ease-out group-hover:scale-105">
-        <span className="absolute -right-2 -top-6 select-none text-[8rem] font-bold leading-none text-white/70">
+      <div className="absolute inset-0 bg-gradient-to-br from-zinc-100 to-zinc-200 transition-transform duration-500 ease-out group-hover:scale-105 dark:from-zinc-800 dark:to-zinc-900">
+        <span className="absolute -right-2 -top-6 select-none text-[8rem] font-bold leading-none text-white/70 dark:text-white/10">
           {String(index + 1).padStart(2, "0")}
         </span>
       </div>
@@ -89,11 +89,11 @@ export function ShowcaseLayout({ items }: { items: WorkItem[] }) {
           className="group relative flex flex-col transition-transform duration-200 hover:-translate-y-1 active:translate-y-0"
         >
           {/* Arrow: slides further out and darkens on hover. */}
-          <span className="absolute right-3 top-3 z-10 text-zinc-500 transition-all duration-200 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-black">
+          <span className="absolute right-3 top-3 z-10 text-zinc-500 transition-all duration-200 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-black dark:group-hover:text-white">
             <Icon icon="mdi:arrow-top-right" className="h-5 w-5" aria-hidden />
           </span>
           {item.video ? (
-            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-zinc-200">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
               <video
                 src={item.video}
                 poster={item.image}
@@ -106,7 +106,7 @@ export function ShowcaseLayout({ items }: { items: WorkItem[] }) {
               />
             </div>
           ) : item.image ? (
-            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-zinc-200">
+            <div className="relative aspect-[16/10] overflow-hidden rounded-lg border border-zinc-200 dark:border-zinc-800">
               <Image
                 src={item.image}
                 alt={`${item.title} screenshot`}
@@ -123,11 +123,11 @@ export function ShowcaseLayout({ items }: { items: WorkItem[] }) {
               {item.period}
             </p>
           )}
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900 underline-offset-4 group-hover:underline">
+          <h3 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900 underline-offset-4 group-hover:underline dark:text-zinc-100">
             {item.title}
           </h3>
           {item.role && <p className="mt-1 text-sm text-zinc-500">{item.role}</p>}
-          <p className="mt-2 flex-1 text-zinc-600">{item.description}</p>
+          <p className="mt-2 flex-1 text-zinc-600 dark:text-zinc-400">{item.description}</p>
           {item.tags && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {item.tags.slice(0, 3).map((t) => (
@@ -153,17 +153,17 @@ function ProjectCardBody({ item }: { item: WorkItem }) {
             </span>
           )}
           {item.archived && (
-            <span className="rounded border border-zinc-200 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-400">
+            <span className="rounded border border-zinc-200 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-400 dark:border-zinc-800">
               Archived
             </span>
           )}
         </div>
       )}
 
-      <h3 className="text-lg font-semibold text-zinc-900 underline-offset-4 group-hover:underline">
+      <h3 className="text-lg font-semibold text-zinc-900 underline-offset-4 group-hover:underline dark:text-zinc-100">
         {item.title}
       </h3>
-      <p className="mt-1 flex-1 text-base text-zinc-600">{item.description}</p>
+      <p className="mt-1 flex-1 text-base text-zinc-600 dark:text-zinc-400">{item.description}</p>
 
       {/* Stats footer, pinned to the bottom so cards align. Kept on one line
          (no wrap) so it never spills onto a second row. */}
@@ -200,7 +200,7 @@ export function ProjectsLayout({ items }: { items: WorkItem[] }) {
           href={item.href ?? "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="group flex flex-col rounded-sm bg-zinc-50 p-5 transition hover:bg-zinc-100"
+          className="group flex flex-col rounded-sm bg-zinc-50 p-5 transition hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
         >
           <ProjectCardBody item={item} />
         </a>
@@ -224,23 +224,23 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
             {item.year}
           </div>
 
-          <div className="min-w-0 flex-1 border-l border-zinc-200 pl-4 sm:pl-5">
+          <div className="min-w-0 flex-1 border-l border-zinc-200 pl-4 sm:pl-5 dark:border-zinc-800">
             {(item.kind || item.status) && (
               <div className="mb-1.5 flex flex-wrap items-center gap-2">
                 {item.kind && (
-                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-500">
+                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:bg-zinc-800">
                     {item.kind}
                   </span>
                 )}
                 {item.status && (
-                  <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                  <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-400">
                     {item.status}
                   </span>
                 )}
               </div>
             )}
 
-            <h3 className="font-semibold leading-snug text-zinc-900">
+            <h3 className="font-semibold leading-snug text-zinc-900 dark:text-zinc-100">
               {item.href ? (
                 <a
                   href={item.href}
@@ -256,7 +256,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
             </h3>
 
             {item.authors && (
-              <p className="mt-1 text-sm text-zinc-600">
+              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                 {item.authors.join(", ")}
               </p>
             )}
@@ -265,7 +265,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
               <p className="mt-0.5 text-sm italic text-zinc-500">{item.venue}</p>
             )}
 
-            <p className="mt-2 max-w-2xl text-sm text-zinc-600">{item.description}</p>
+            <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">{item.description}</p>
 
             {item.keywords && item.keywords.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-1.5">
@@ -283,7 +283,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
                     href={l.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-md border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-black"
+                    className="rounded-md border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-black dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-white"
                   >
                     {l.label}
                   </a>
@@ -293,7 +293,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
                     href={`https://doi.org/${item.doi}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="rounded-md border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-black"
+                    className="rounded-md border border-zinc-200 px-2.5 py-1 text-xs font-medium text-zinc-600 transition hover:border-zinc-300 hover:text-black dark:border-zinc-800 dark:text-zinc-400 dark:hover:border-zinc-700 dark:hover:text-white"
                   >
                     DOI
                   </a>

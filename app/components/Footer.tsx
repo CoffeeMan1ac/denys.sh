@@ -12,22 +12,24 @@ const footerLinks = [
 
 // Per-link hover/active color.
 const linkColor: Record<string, string> = {
-  GitHub: "hover:text-[#57606a] active:text-[#181717]",
+  // GitHub's grays disappear on the dark background, so it lightens instead.
+  GitHub:
+    "hover:text-[#57606a] active:text-[#181717] dark:hover:text-[#adbac7] dark:active:text-[#cdd9e5]",
   LinkedIn: "hover:text-[#5b9bd5] active:text-[#0a66c2]",
   Bluesky: "hover:text-[#4f9bff] active:text-[#1185fe]",
   Email: "hover:text-[#f2796b] active:text-[#ea4335]",
-  Cal: "hover:text-zinc-700 active:text-zinc-900",
+  Cal: "hover:text-zinc-700 active:text-zinc-900 dark:hover:text-zinc-300 dark:active:text-zinc-100",
 };
 
 export default function Footer() {
   return (
-    <footer id="site-footer" className="border-t border-zinc-200">
+    <footer id="site-footer" className="border-t border-zinc-200 dark:border-zinc-800">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 py-6 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
         <span>
           denys.sh · <LocalTime /> · last updated June 2026 ·{" "}
           <Link
             href="/colophon"
-            className="transition-colors hover:text-zinc-700 active:text-zinc-900"
+            className="transition-colors hover:text-zinc-700 active:text-zinc-900 dark:hover:text-zinc-300 dark:active:text-zinc-100"
           >
             Colophon
           </Link>

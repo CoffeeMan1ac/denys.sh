@@ -10,7 +10,7 @@ export default function HeroImage() {
         width={900}
         height={675}
         priority
-        className="w-[432px] rounded-lg border border-zinc-400 object-cover shadow-sm"
+        className="w-[432px] rounded-lg border border-zinc-400 object-cover shadow-sm dark:border-zinc-600"
       />
     </div>
   );

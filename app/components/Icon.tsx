@@ -24,6 +24,8 @@ import notebookOutline from "@iconify-icons/mdi/notebook-outline";
 import refresh from "@iconify-icons/mdi/refresh";
 import starOutline from "@iconify-icons/mdi/star-outline";
 import trayArrowDown from "@iconify-icons/mdi/tray-arrow-down";
+import weatherNight from "@iconify-icons/mdi/weather-night";
+import weatherSunny from "@iconify-icons/mdi/weather-sunny";
 
 const registry = {
   "mdi:account-outline": accountOutline,
@@ -39,6 +41,8 @@ const registry = {
   "mdi:refresh": refresh,
   "mdi:star-outline": starOutline,
   "mdi:tray-arrow-down": trayArrowDown,
+  "mdi:weather-night": weatherNight,
+  "mdi:weather-sunny": weatherSunny,
 } as const;
 
 // Register every icon at module load; runs before any <Icon> in a consuming

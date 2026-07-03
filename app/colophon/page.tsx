@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 type Link = { name: string; href: string };
 
 const linkClass =
-  "text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors hover:decoration-zinc-900";
+  "text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition-colors hover:decoration-zinc-900 dark:text-zinc-100 dark:decoration-zinc-600 dark:hover:decoration-zinc-100";
 
 // People and personal sites whose work inspired some of mine. Link is credit
 const inspirations: Link[] = [
@@ -59,7 +59,7 @@ export default function ColophonPage() {
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
           Built with
         </h2>
-        <p className="mt-2 text-zinc-600">
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           {builtWith.map((tool, i) => (
             <span key={tool.href}>
               {i > 0 && " · "}
@@ -74,7 +74,7 @@ export default function ColophonPage() {
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
           Nitty-gritty, SEO, etc.
         </h2>
-        <ul className="mt-4 space-y-3 text-zinc-600">
+        <ul className="mt-4 space-y-3 text-zinc-600 dark:text-zinc-400">
           <li>
             Per-route metadata and <ExternalLink {...openGraph} /> cards
           </li>
@@ -98,7 +98,7 @@ export default function ColophonPage() {
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
           Inspiration
         </h2>
-        <p className="mt-2 text-zinc-600">
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           Sites and people whose work I looked to while building this website —
           for their implementation, design, structure and close attention to
           detail.
@@ -116,7 +116,7 @@ export default function ColophonPage() {
         <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
           Other versions
         </h2>
-        <p className="mt-2 text-zinc-600">
+        <p className="mt-2 text-zinc-600 dark:text-zinc-400">
           <ExternalLink {...previousSite} /> — 2024-2025
         </p>
       </section>
