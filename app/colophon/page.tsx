@@ -31,6 +31,8 @@ const builtWith: Link[] = [
 
 const inter: Link = { name: "Inter", href: "https://rsms.me/inter/" };
 
+const previousSite: Link = { name: "v1.denys.sh", href: "https://v1.denys.sh" };
+
 // SEO/infra bits that make the site fast, shareable, and legible to machines.
 const openGraph: Link = { name: "Open Graph", href: "https://ogp.me" };
 const schemaOrg: Link = { name: "schema.org", href: "https://schema.org" };
@@ -108,6 +110,15 @@ export default function ColophonPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      <section className="mt-10">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
+          Other versions
+        </h2>
+        <p className="mt-2 text-zinc-600">
+          <ExternalLink {...previousSite} /> — 2024-2025
+        </p>
       </section>
     </div>
   );
