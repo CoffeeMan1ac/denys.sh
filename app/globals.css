@@ -12,6 +12,10 @@
 [data-theme="dark"] {
   --background: #0b0b0d;
   --foreground: #f4f4f5;
+  /* Surfaces sit higher above the deep background than stock zinc would:
+     every dark: card/chip/border references these two tokens. */
+  --color-zinc-900: #1e1e22;
+  --color-zinc-800: #2e2e33;
 }
 
 @theme inline {
