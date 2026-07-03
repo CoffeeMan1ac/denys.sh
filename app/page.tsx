@@ -23,9 +23,9 @@ export default function Home() {
         {/* Hero: name + description on the left, image to the right. Narrower
             than the buttons row, and tall enough that the buttons sit well
             below the description. */}
-        <div className="mx-auto mt-24 flex w-full max-w-4xl items-start justify-between gap-8">
+        <div className="mx-auto mt-8 flex w-full max-w-4xl flex-col items-start gap-8 md:mt-24 md:flex-row md:justify-between">
           <div>
-            <p className="text-2xl text-zinc-600 dark:text-zinc-400">
+            <p className="text-xl text-zinc-600 sm:text-2xl dark:text-zinc-400">
               Hi, I&apos;m Denys. I build things people use, working across
               backend and front end. I think in patterns and pictures, so
               you&apos;ll catch me sketching a problem on paper until the thing
@@ -60,7 +60,7 @@ export default function Home() {
               </svg>
               .
             </p>
-            <p className="mt-4 text-2xl text-zinc-600 dark:text-zinc-400">
+            <p className="mt-4 text-xl text-zinc-600 sm:text-2xl dark:text-zinc-400">
               Happy to chat or take on work; you can reach me via{" "}
               <a
                 href={`mailto:${EMAIL}`}
