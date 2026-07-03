@@ -65,20 +65,15 @@ export default function Header() {
           <TerminalTrigger variant="nav" />
           <ThemeToggle />
         </nav>
-        {/* Phones: theme toggle stays reachable in the row, the rest of the nav
-            moves into the drawer. */}
-        <div className="flex items-center gap-3 sm:hidden">
-          <ThemeToggle />
-          <button
-            type="button"
-            onClick={() => setMenuOpen(true)}
-            aria-label="Open menu"
-            aria-expanded={menuOpen}
-            className="-mr-2 p-2 text-zinc-600 dark:text-zinc-400"
-          >
-            <Icon icon="mdi:menu" className="h-7 w-7" aria-hidden />
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          aria-label="Open menu"
+          aria-expanded={menuOpen}
+          className="-mr-2 shrink-0 p-2 text-zinc-600 sm:hidden dark:text-zinc-400"
+        >
+          <Icon icon="mdi:menu" className="h-7 w-7" aria-hidden />
+        </button>
       </div>
 
       {/* Drawer, always mounted so it can slide; inert while closed so its
@@ -113,6 +108,9 @@ export default function Header() {
             onClick={() => setMenuOpen(false)}
             className="flex flex-col items-start gap-1 px-6 text-xl text-zinc-600 dark:text-zinc-400"
           >
+            <Link href="/" className="py-2 hover:text-black dark:hover:text-white">
+              Home
+            </Link>
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -126,6 +124,11 @@ export default function Header() {
               <TerminalTrigger variant="nav" />
             </span>
           </nav>
+          {/* Outside the closing nav so flipping the theme keeps the drawer open. */}
+          <div className="mt-auto flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+            <span className="text-base">Theme</span>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>
