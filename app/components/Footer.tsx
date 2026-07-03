@@ -25,14 +25,21 @@ export default function Footer() {
   return (
     <footer id="site-footer" className="border-t border-zinc-200 dark:border-zinc-800">
       <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 py-6 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
-        <span>
-          denys.sh · <LocalTime /> · last updated June 2026 ·{" "}
-          <Link
-            href="/colophon"
-            className="transition-colors hover:text-zinc-700 active:text-zinc-900 dark:hover:text-zinc-300 dark:active:text-zinc-100"
-          >
-            Colophon
-          </Link>
+        {/* Two lines on phones, one on sm+ (the middle dot bridges them). */}
+        <span className="flex flex-col items-center gap-1 sm:flex-row sm:gap-0">
+          <span>
+            denys.sh · <LocalTime />
+          </span>
+          <span className="hidden sm:inline">&nbsp;·&nbsp;</span>
+          <span>
+            last updated June 2026 ·{" "}
+            <Link
+              href="/colophon"
+              className="transition-colors hover:text-zinc-700 active:text-zinc-900 dark:hover:text-zinc-300 dark:active:text-zinc-100"
+            >
+              Colophon
+            </Link>
+          </span>
         </span>
         <nav className="flex flex-wrap justify-center gap-x-3 gap-y-1">
           {footerLinks.map((link) => {
