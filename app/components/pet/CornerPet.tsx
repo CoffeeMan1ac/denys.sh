@@ -53,6 +53,8 @@ export default function CornerPet() {
   const [pending, setPending] = useState(false);
   const [speech, setSpeech] = useState<{ text: string; until: number } | null>(null);
   const [lift, setLift] = useState(0); // px to lift so we don't overlap the footer
+  const [isMobile, setIsMobile] = useState(false); // below sm: launcher button + sheet
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -92,6 +94,31 @@ export default function CornerPet() {
       if (raf) window.cancelAnimationFrame(raf);
     };
   }, [pathname]);
+
+  // Below sm the free-floating pet is too big next to full-width content, so it
+  // collapses into a launcher button plus a bottom sheet.
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  // Sheet: close on Escape, lock background scroll while open.
+  useEffect(() => {
+    if (!sheetOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSheetOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
+  }, [sheetOpen]);
 
   // Load the stored name/mood from localStorage. On the page's first load
   // (initial), a gap since lastSeen over MISSED_AWAY_MS shows the "missed you"
@@ -281,20 +308,39 @@ export default function CornerPet() {
   // One at a time: stay hidden while the pet shows in the terminal.
   if (!hydrated || claimed) return null;
 
-  // No name yet: show a nudge. Clicking opens the terminal and runs the pet
-  // straight into its naming screen.
+  // No name yet: show a nudge (a badged launcher on phones). Clicking opens the
+  // terminal and runs the pet straight into its naming screen.
   if (!name) {
+    const startNaming = () => {
+      requestPetName();
+      open();
+      run("pet");
+    };
+    if (isMobile) {
+      return (
+        <button
+          type="button"
+          onClick={startNaming}
+          aria-label="Meet the pet"
+          style={{ transform: `translateY(-${lift}px)` }}
+          className="fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-white font-mono text-sm text-zinc-600 shadow-lg ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-700"
+        >
+          <span aria-hidden className="whitespace-pre">
+            {"(?.?)"}
+          </span>
+          <span
+            aria-hidden
+            className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-amber-400"
+          />
+        </button>
+      );
+    }
     return (
       <button
         type="button"
-        onClick={() => {
-          // Open the terminal, launch the pet, and open the naming screen.
-          requestPetName();
-          open();
-          run("pet");
-        }}
+        onClick={startNaming}
         style={{ transform: `translateY(-${lift}px)` }}
-        className="fixed bottom-4 right-6 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 sm:right-32 dark:hover:text-zinc-200"
+        className="fixed bottom-4 right-32 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
       >
         psst — name me!{" "}
         <span className="font-semibold text-zinc-700 dark:text-zinc-300">(click!)</span>
@@ -339,100 +385,157 @@ export default function CornerPet() {
     ? ".".repeat((Math.floor(now / 350) % 3) + 1)
     : (speech?.text ?? "");
 
+  // Session transcript: everything said this page load. In-memory only,
+  // gone on reload.
+  const transcriptPanel = showLog && turns > 0 && (
+    <div
+      ref={logRef}
+      className={`max-h-48 overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800 ${
+        isMobile ? "w-full" : "w-56"
+      }`}
+    >
+      {pet.transcript().map((m, i) => (
+        <p key={i} className={i ? "mt-1.5" : ""}>
+          <span className={m.role === "user" ? "text-zinc-400" : "text-zinc-500"}>
+            {m.role === "user" ? "you" : name}:{" "}
+          </span>
+          <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
+            {m.content}
+          </span>
+        </p>
+      ))}
+    </div>
+  );
+
+  const bubble = showBubble && (
+    <div className="w-max max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl bg-white/95 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:text-zinc-300 dark:ring-zinc-800">
+      {bubbleText}
+    </div>
+  );
+
+  // Talk field, with a toggle to its right (out of flow, so the field stays
+  // centered over the pet) to reveal the conversation.
+  const talkRow = (
+    <div className="relative flex items-center">
+      <textarea
+        ref={chatRef}
+        value={chatDraft}
+        onChange={(e) => setChatDraft(e.target.value)}
+        onKeyDown={onChatKeyDown}
+        onFocus={() => setInputFocused(true)}
+        onBlur={() => setInputFocused(false)}
+        maxLength={pet.CHAT_MAX}
+        placeholder="talk"
+        rows={1}
+        spellCheck={false}
+        aria-label={`Talk to ${name}`}
+        className={`resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400 ${
+          isMobile ? "w-64" : "w-40"
+        }`}
+      />
+      {turns > 0 && (
+        <button
+          type="button"
+          onClick={() => setShowLog((v) => !v)}
+          aria-label={showLog ? "Hide conversation" : "Show conversation"}
+          aria-expanded={showLog}
+          className="absolute left-full ml-1 shrink-0 scale-x-150 text-2xl leading-none text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
+        >
+          {showLog ? "▾" : "▴"}
+        </button>
+      )}
+    </div>
+  );
+
+  // The pet: click to boop.
+  const figure = (
+    <div
+      role="button"
+      aria-label={`Boop ${name}`}
+      onClick={boop}
+      className="flex cursor-pointer select-none flex-col items-center text-2xl leading-tight"
+    >
+      <div className={`h-5 whitespace-pre text-center text-sm ${face.bubble?.tone ?? ""}`}>
+        {face.bubble?.text ?? ""}
+      </div>
+      <div className="mb-0.5 text-base text-zinc-500">{name}</div>
+      {topper && <div className="leading-none">{topper}</div>}
+      {breathe && <div className="h-1" aria-hidden />}
+      <div className="whitespace-pre">{face.ears}</div>
+      {/* Tag sits to the left (inward) so it doesn't run off-screen. */}
+      <div className="relative whitespace-pre">
+        {face.tag && (
+          <span className={`absolute right-full top-0 mr-2 text-sm ${face.tag.tone}`}>
+            {face.tag.text}
+          </span>
+        )}
+        {face.eyes}
+      </div>
+      <div className="whitespace-pre">{face.paws}</div>
+      {!breathe && <div className="h-1" aria-hidden />}
+    </div>
+  );
+
+  // Phones: a live-chat style launcher showing the pet's live eyes; the full
+  // pet opens in a bottom sheet so it never sits over the page content.
+  if (isMobile) {
+    return (
+      <>
+        <button
+          type="button"
+          onClick={() => setSheetOpen(true)}
+          aria-label={`Open ${name}`}
+          style={{ transform: `translateY(-${lift}px)` }}
+          className={`fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-white font-mono text-xs text-zinc-700 shadow-lg ring-1 ring-zinc-200 transition-opacity dark:bg-zinc-900 dark:text-zinc-300 dark:ring-zinc-700 ${
+            sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"
+          }`}
+        >
+          <span aria-hidden className="whitespace-pre">
+            {face.eyes}
+          </span>
+        </button>
+        {/* Sheet, always mounted so it can slide; inert while closed. */}
+        <div
+          className={`fixed inset-0 z-50 ${sheetOpen ? "" : "pointer-events-none"}`}
+          inert={!sheetOpen}
+        >
+          <div
+            className={`absolute inset-0 bg-zinc-900/20 backdrop-blur-sm transition-opacity duration-200 ease-out dark:bg-zinc-950/50 ${
+              sheetOpen ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={() => setSheetOpen(false)}
+          />
+          <div
+            className={`absolute inset-x-0 bottom-0 flex flex-col items-center gap-2 rounded-t-2xl border-t border-zinc-200 bg-white px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-3 font-mono text-zinc-700 shadow-2xl transition-transform duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
+              sheetOpen ? "translate-y-0" : "translate-y-full"
+            }`}
+          >
+            {transcriptPanel}
+            {bubble}
+            {figure}
+            {talkRow}
+          </div>
+        </div>
+      </>
+    );
+  }
+
   return (
     <div
       ref={cardRef}
       style={{ transform: `translateY(-${lift}px)` }}
-      className="fixed bottom-4 right-6 z-40 flex select-none flex-col items-center font-mono text-zinc-700 sm:right-32 dark:text-zinc-300"
+      className="fixed bottom-4 right-32 z-40 flex select-none flex-col items-center font-mono text-zinc-700 dark:text-zinc-300"
     >
       {/* On top of the pet: the chat input while talking, otherwise the bubble. */}
       <div className="relative flex flex-col items-center">
-      {/* Above the pet (out of flow, so the pet doesn't shift): reply bubble,
-          then the talk field. The "talk" placeholder is the only affordance.
-          Right-anchored on phones (the pet sits near the edge, so a centered
-          bubble would clip); centered over the pet from sm up. */}
-      <div className="absolute bottom-full right-0 mb-1 flex flex-col items-end gap-1 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:items-center">
-        {/* Session transcript: everything said this page load. In-memory only,
-            gone on reload. */}
-        {showLog && turns > 0 && (
-          <div
-            ref={logRef}
-            className="max-h-48 w-56 overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800"
-          >
-            {pet.transcript().map((m, i) => (
-              <p key={i} className={i ? "mt-1.5" : ""}>
-                <span className={m.role === "user" ? "text-zinc-400" : "text-zinc-500"}>
-                  {m.role === "user" ? "you" : name}:{" "}
-                </span>
-                <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
-                  {m.content}
-                </span>
-              </p>
-            ))}
-          </div>
-        )}
-        {showBubble && (
-          <div className="w-max max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl bg-white/95 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:text-zinc-300 dark:ring-zinc-800">
-            {bubbleText}
-          </div>
-        )}
-        {/* Talk field, with a toggle to its right (out of flow, so the field
-            stays centered over the pet) to reveal the conversation. */}
-        <div className="relative flex items-center">
-          <textarea
-            ref={chatRef}
-            value={chatDraft}
-            onChange={(e) => setChatDraft(e.target.value)}
-            onKeyDown={onChatKeyDown}
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => setInputFocused(false)}
-            maxLength={pet.CHAT_MAX}
-            placeholder="talk"
-            rows={1}
-            spellCheck={false}
-            aria-label={`Talk to ${name}`}
-            className="w-40 resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
-          />
-          {turns > 0 && (
-            <button
-              type="button"
-              onClick={() => setShowLog((v) => !v)}
-              aria-label={showLog ? "Hide conversation" : "Show conversation"}
-              aria-expanded={showLog}
-              className="absolute left-full ml-1 shrink-0 scale-x-150 text-2xl leading-none text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
-            >
-              {showLog ? "▾" : "▴"}
-            </button>
-          )}
+        {/* Above the pet (out of flow, so the pet doesn't shift): reply bubble,
+            then the talk field. The "talk" placeholder is the only affordance. */}
+        <div className="absolute bottom-full left-1/2 mb-1 flex -translate-x-1/2 flex-col items-center gap-1">
+          {transcriptPanel}
+          {bubble}
+          {talkRow}
         </div>
-      </div>
-
-      {/* The pet: click to boop. */}
-      <div
-        role="button"
-        aria-label={`Boop ${name}`}
-        onClick={boop}
-        className="flex cursor-pointer flex-col items-center text-2xl leading-tight"
-      >
-        <div className={`h-5 whitespace-pre text-center text-sm ${face.bubble?.tone ?? ""}`}>
-          {face.bubble?.text ?? ""}
-        </div>
-        <div className="mb-0.5 text-base text-zinc-500">{name}</div>
-        {topper && <div className="leading-none">{topper}</div>}
-        {breathe && <div className="h-1" aria-hidden />}
-        <div className="whitespace-pre">{face.ears}</div>
-        {/* Tag sits to the left (inward) so it doesn't run off-screen. */}
-        <div className="relative whitespace-pre">
-          {face.tag && (
-            <span className={`absolute right-full top-0 mr-2 text-sm ${face.tag.tone}`}>
-              {face.tag.text}
-            </span>
-          )}
-          {face.eyes}
-        </div>
-        <div className="whitespace-pre">{face.paws}</div>
-        {!breathe && <div className="h-1" aria-hidden />}
-      </div>
+        {figure}
       </div>
     </div>
   );
