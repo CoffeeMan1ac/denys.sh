@@ -19,6 +19,7 @@ import close from "@iconify-icons/mdi/close";
 import consoleLine from "@iconify-icons/mdi/console-line";
 import fileDocumentOutline from "@iconify-icons/mdi/file-document-outline";
 import fountainPenTip from "@iconify-icons/mdi/fountain-pen-tip";
+import menu from "@iconify-icons/mdi/menu";
 import minus from "@iconify-icons/mdi/minus";
 import notebookOutline from "@iconify-icons/mdi/notebook-outline";
 import refresh from "@iconify-icons/mdi/refresh";
@@ -36,6 +37,7 @@ const registry = {
   "mdi:console-line": consoleLine,
   "mdi:file-document-outline": fileDocumentOutline,
   "mdi:fountain-pen-tip": fountainPenTip,
+  "mdi:menu": menu,
   "mdi:minus": minus,
   "mdi:notebook-outline": notebookOutline,
   "mdi:refresh": refresh,
