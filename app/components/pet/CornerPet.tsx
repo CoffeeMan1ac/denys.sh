@@ -294,7 +294,7 @@ export default function CornerPet() {
           run("pet");
         }}
         style={{ transform: `translateY(-${lift}px)` }}
-        className="fixed bottom-4 right-32 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
+        className="fixed bottom-4 right-6 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 sm:right-32 dark:hover:text-zinc-200"
       >
         psst — name me!{" "}
         <span className="font-semibold text-zinc-700 dark:text-zinc-300">(click!)</span>
@@ -343,13 +343,15 @@ export default function CornerPet() {
     <div
       ref={cardRef}
       style={{ transform: `translateY(-${lift}px)` }}
-      className="fixed bottom-4 right-32 z-40 flex select-none flex-col items-center font-mono text-zinc-700 dark:text-zinc-300"
+      className="fixed bottom-4 right-6 z-40 flex select-none flex-col items-center font-mono text-zinc-700 sm:right-32 dark:text-zinc-300"
     >
       {/* On top of the pet: the chat input while talking, otherwise the bubble. */}
       <div className="relative flex flex-col items-center">
       {/* Above the pet (out of flow, so the pet doesn't shift): reply bubble,
-          then the talk field. The "talk" placeholder is the only affordance. */}
-      <div className="absolute bottom-full left-1/2 mb-1 flex -translate-x-1/2 flex-col items-center gap-1">
+          then the talk field. The "talk" placeholder is the only affordance.
+          Right-anchored on phones (the pet sits near the edge, so a centered
+          bubble would clip); centered over the pet from sm up. */}
+      <div className="absolute bottom-full right-0 mb-1 flex flex-col items-end gap-1 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:items-center">
         {/* Session transcript: everything said this page load. In-memory only,
             gone on reload. */}
         {showLog && turns > 0 && (
