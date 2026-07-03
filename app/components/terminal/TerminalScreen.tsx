@@ -13,12 +13,12 @@ export default function TerminalScreen() {
   const { open } = useTerminal();
 
   return (
-    <div className="fixed inset-0 z-[70] flex flex-col bg-white">
+    <div className="fixed inset-0 z-[70] flex flex-col bg-white dark:bg-zinc-950">
       {/* Traffic lights, the mirror image of the popup's:
             red    → back to the main page (closes the fullscreen)
             yellow → main page with the popup terminal open (minimize to it)
             green  → reload this screen (effectively a refresh) */}
-      <div className="flex items-center border-b border-zinc-200 bg-zinc-100 px-4 py-2">
+      <div className="flex items-center border-b border-zinc-200 bg-zinc-100 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900">
         <span className="flex items-center gap-1.5">
           <button
             type="button"

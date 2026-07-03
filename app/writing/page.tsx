@@ -18,7 +18,7 @@ export default function WritingPage() {
   return (
     <div>
       <h1 className="text-3xl font-semibold tracking-tight">Writing</h1>
-      <p className="mt-2 max-w-2xl text-zinc-600">
+      <p className="mt-2 max-w-2xl text-zinc-600 dark:text-zinc-400">
         Reports and write-ups from coursework and side projects.
       </p>
       <div className="mt-10">

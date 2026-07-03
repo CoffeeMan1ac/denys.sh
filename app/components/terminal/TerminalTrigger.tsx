@@ -32,7 +32,7 @@ export default function TerminalTrigger({
       type="button"
       onClick={open}
       title="Terminal (Ctrl+`)"
-      className="cursor-pointer hover:text-black"
+      className="cursor-pointer hover:text-black dark:hover:text-white"
     >
       Terminal
     </button>

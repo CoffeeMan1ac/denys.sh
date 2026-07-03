@@ -160,7 +160,7 @@ function Section({
 }) {
   return (
     <section className="mt-10">
-      <h2 className="border-b border-zinc-200 pb-1 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+      <h2 className="border-b border-zinc-200 pb-1 dark:border-zinc-800 text-xs font-semibold uppercase tracking-widest text-zinc-400">
         {title}
       </h2>
       <div className="mt-4 space-y-6">{children}</div>
@@ -172,7 +172,7 @@ function EntryBlock({ entry }: { entry: Entry }) {
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <h3 className="font-medium text-zinc-900">
+        <h3 className="font-medium text-zinc-900 dark:text-zinc-100">
           {entry.href ? (
             <a
               href={entry.href}
@@ -193,7 +193,7 @@ function EntryBlock({ entry }: { entry: Entry }) {
       {(entry.subtitle || entry.meta) && (
         <div className="flex flex-wrap items-baseline justify-between gap-x-4">
           {entry.subtitle && (
-            <p className="text-sm italic text-zinc-600">{entry.subtitle}</p>
+            <p className="text-sm italic text-zinc-600 dark:text-zinc-400">{entry.subtitle}</p>
           )}
           {entry.meta && (
             <span className="shrink-0 text-sm text-zinc-500">{entry.meta}</span>
@@ -201,7 +201,7 @@ function EntryBlock({ entry }: { entry: Entry }) {
         </div>
       )}
       {entry.bullets && (
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-700 marker:text-zinc-300">
+        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-zinc-700 marker:text-zinc-300 dark:text-zinc-300 dark:marker:text-zinc-700">
           {entry.bullets.map((b) => (
             <li key={b}>{b}</li>
           ))}
@@ -215,14 +215,14 @@ export default function ResumePage() {
   return (
     <div className="mx-auto max-w-3xl">
       {/* Header: identity + contact on the left, PDF download on the right. */}
-      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200 pb-6">
+      <header className="flex flex-wrap items-start justify-between gap-4 border-b border-zinc-200 pb-6 dark:border-zinc-800">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Denys</h1>
-          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-600">
+          <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-zinc-600 dark:text-zinc-400">
             <span>Dublin, Ireland</span>
             {contacts.map((c) => (
               <span key={c.href} className="flex items-center gap-2">
-                <span aria-hidden className="text-zinc-300">
+                <span aria-hidden className="text-zinc-300 dark:text-zinc-700">
                   ·
                 </span>
                 <a
@@ -233,7 +233,7 @@ export default function ResumePage() {
                       ? "noopener noreferrer"
                       : undefined
                   }
-                  className="underline-offset-2 hover:text-black hover:underline"
+                  className="underline-offset-2 hover:text-black hover:underline dark:hover:text-white"
                 >
                   {c.label}
                 </a>
@@ -244,7 +244,7 @@ export default function ResumePage() {
         <a
           href={RESUME_PDF}
           download
-          className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium shadow-sm transition hover:bg-zinc-50"
+          className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-zinc-200 px-4 py-2 text-sm font-medium shadow-sm transition hover:bg-zinc-50 dark:border-zinc-800 dark:hover:bg-zinc-900"
         >
           <Icon icon="mdi:tray-arrow-down" className="h-4 w-4" aria-hidden />
           Download PDF
@@ -282,10 +282,10 @@ export default function ResumePage() {
       </Section>
 
       <Section title="Skills & Interests">
-        <ul className="space-y-1.5 text-sm text-zinc-700">
+        <ul className="space-y-1.5 text-sm text-zinc-700 dark:text-zinc-300">
           {skills.map((s) => (
             <li key={s.label}>
-              <span className="font-medium text-zinc-900">{s.label}:</span>{" "}
+              <span className="font-medium text-zinc-900 dark:text-zinc-100">{s.label}:</span>{" "}
               {s.value}
             </li>
           ))}

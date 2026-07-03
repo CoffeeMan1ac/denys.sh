@@ -294,10 +294,10 @@ export default function CornerPet() {
           run("pet");
         }}
         style={{ transform: `translateY(-${lift}px)` }}
-        className="fixed bottom-4 right-32 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800"
+        className="fixed bottom-4 right-32 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
       >
         psst — name me!{" "}
-        <span className="font-semibold text-zinc-700">(click!)</span>
+        <span className="font-semibold text-zinc-700 dark:text-zinc-300">(click!)</span>
       </button>
     );
   }
@@ -343,7 +343,7 @@ export default function CornerPet() {
     <div
       ref={cardRef}
       style={{ transform: `translateY(-${lift}px)` }}
-      className="fixed bottom-4 right-32 z-40 flex select-none flex-col items-center font-mono text-zinc-700"
+      className="fixed bottom-4 right-32 z-40 flex select-none flex-col items-center font-mono text-zinc-700 dark:text-zinc-300"
     >
       {/* On top of the pet: the chat input while talking, otherwise the bubble. */}
       <div className="relative flex flex-col items-center">
@@ -355,14 +355,14 @@ export default function CornerPet() {
         {showLog && turns > 0 && (
           <div
             ref={logRef}
-            className="max-h-48 w-56 overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200"
+            className="max-h-48 w-56 overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800"
           >
             {pet.transcript().map((m, i) => (
               <p key={i} className={i ? "mt-1.5" : ""}>
                 <span className={m.role === "user" ? "text-zinc-400" : "text-zinc-500"}>
                   {m.role === "user" ? "you" : name}:{" "}
                 </span>
-                <span className="whitespace-pre-wrap break-words text-zinc-700">
+                <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
                   {m.content}
                 </span>
               </p>
@@ -370,7 +370,7 @@ export default function CornerPet() {
           </div>
         )}
         {showBubble && (
-          <div className="w-max max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl bg-white/95 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm ring-1 ring-zinc-200">
+          <div className="w-max max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl bg-white/95 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:text-zinc-300 dark:ring-zinc-800">
             {bubbleText}
           </div>
         )}
@@ -389,7 +389,7 @@ export default function CornerPet() {
             rows={1}
             spellCheck={false}
             aria-label={`Talk to ${name}`}
-            className="w-40 resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600"
+            className="w-40 resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
           />
           {turns > 0 && (
             <button
@@ -397,7 +397,7 @@ export default function CornerPet() {
               onClick={() => setShowLog((v) => !v)}
               aria-label={showLog ? "Hide conversation" : "Show conversation"}
               aria-expanded={showLog}
-              className="absolute left-full ml-1 shrink-0 scale-x-150 text-2xl leading-none text-zinc-400 transition-colors hover:text-zinc-700"
+              className="absolute left-full ml-1 shrink-0 scale-x-150 text-2xl leading-none text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
             >
               {showLog ? "▾" : "▴"}
             </button>

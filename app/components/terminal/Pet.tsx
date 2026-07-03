@@ -1061,29 +1061,29 @@ export default function Pet({
   switch (phase) {
     case "missed":
       eyes = "( ^o^ )";
-      tag = { text: "missed you!", tone: "text-emerald-600" };
+      tag = { text: "missed you!", tone: "text-emerald-600 dark:text-emerald-400" };
       bubble = { text: "  ♥", tone: "text-pink-500" };
       break;
     case "dizzy":
       eyes = "( @_@ )";
-      tag = { text: "~grr", tone: "text-amber-600" };
+      tag = { text: "~grr", tone: "text-amber-600 dark:text-amber-400" };
       break;
     case "special":
       eyes = "( *o* )";
-      tag = { text: "✧!", tone: "text-violet-600" };
+      tag = { text: "✧!", tone: "text-violet-600 dark:text-violet-400" };
       bubble = { text: "✦ ✧ ✦", tone: "text-violet-500" };
       break;
     case "booped": {
       const r = BOOP_REACTIONS[reaction.current];
       eyes = r.eyes;
-      tag = { text: r.tag, tone: "text-emerald-600" };
+      tag = { text: r.tag, tone: "text-emerald-600 dark:text-emerald-400" };
       const rise = (now - (boopUntil.current - BOOP_MS)) / BOOP_MS; // 0→1
       bubble = { text: rise < 0.5 ? "  ♥   ♥" : "♥       ♥", tone: "text-pink-500" };
       break;
     }
     case "startled":
       eyes = "( O.O )";
-      tag = { text: "!", tone: "text-amber-600" };
+      tag = { text: "!", tone: "text-amber-600 dark:text-amber-400" };
       break;
     case "watch": {
       const v = visitor.current!;
@@ -1096,7 +1096,7 @@ export default function Pet({
     case "idle-yawn":
       eyes = "( o3o )";
       tag = { text: "~yawn", tone: "text-zinc-400" };
-      bubble = { text: "  o", tone: "text-zinc-300" };
+      bubble = { text: "  o", tone: "text-zinc-300 dark:text-zinc-600" };
       break;
     case "idle-stretch":
       eyes = "( =_= )";
@@ -1121,8 +1121,8 @@ export default function Pet({
       break;
     case "cheer":
       eyes = "( ^o^ )";
-      tag = { text: "done!", tone: "text-emerald-600" };
-      bubble = { text: "✦ ♪ ✦", tone: "text-amber-500" };
+      tag = { text: "done!", tone: "text-emerald-600 dark:text-emerald-400" };
+      bubble = { text: "✦ ♪ ✦", tone: "text-amber-500 dark:text-amber-400" };
       break;
     case "shush":
       eyes = "( -.- )";
@@ -1134,13 +1134,13 @@ export default function Pet({
       break;
     case "focus-paused":
       eyes = "( o_o )";
-      tag = { text: "paused", tone: "text-amber-600" };
+      tag = { text: "paused", tone: "text-amber-600 dark:text-amber-400" };
       break;
     case "focus-break":
       eyes = "( ^_^ )";
       tag = {
         text: focusRef.current?.phase === "long" ? "rest~" : "break~",
-        tone: "text-emerald-600",
+        tone: "text-emerald-600 dark:text-emerald-400",
       };
       break;
     case "cry":
@@ -1218,13 +1218,13 @@ export default function Pet({
         if (naming || setupActive || talking) return; // let inputs keep the keyboard
         rootRef.current?.focus();
       }}
-      className="relative flex h-full flex-col items-center justify-center overflow-hidden bg-white font-mono text-[17px] leading-tight text-zinc-800 outline-none"
+      className="relative flex h-full flex-col items-center justify-center overflow-hidden bg-white font-mono text-[17px] leading-tight text-zinc-800 outline-none dark:bg-zinc-950 dark:text-zinc-200"
     >
       {/* Block-complete flash. */}
       {flashAmt > 0 && (
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 z-20 bg-emerald-200"
+          className="pointer-events-none absolute inset-0 z-20 bg-emerald-200 dark:bg-emerald-900"
           style={{ opacity: flashAmt * 0.5 }}
         />
       )}
@@ -1261,14 +1261,14 @@ export default function Pet({
           {/* task: typed in place */}
           <div
             className={`flex w-60 items-center justify-between rounded px-3 py-1 ${
-              setup.field === 0 ? "bg-zinc-100 text-zinc-900" : "text-zinc-500"
+              setup.field === 0 ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100" : "text-zinc-500"
             }`}
           >
             <span className="text-sm">task</span>
             <span className="font-mono text-base">
-              {setup.task || <span className="text-zinc-300">name one task…</span>}
+              {setup.task || <span className="text-zinc-300 dark:text-zinc-600">name one task…</span>}
               {setup.field === 0 && (
-                <span className="ml-px animate-pulse text-zinc-800">▏</span>
+                <span className="ml-px animate-pulse text-zinc-800 dark:text-zinc-200">▏</span>
               )}
             </span>
           </div>
@@ -1286,7 +1286,7 @@ export default function Pet({
               <div
                 key={label}
                 className={`flex w-60 items-center justify-between rounded px-3 py-1 ${
-                  sel ? "bg-zinc-100 text-zinc-900" : "text-zinc-500"
+                  sel ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100" : "text-zinc-500"
                 }`}
               >
                 <span className="text-sm">{label}</span>
@@ -1308,7 +1308,7 @@ export default function Pet({
       >
         {/* Speech bubble: the pet's reply (or the thinking dots) sits above it. */}
         {showBubble && (
-          <div className="mb-2 max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm">
+          <div className="mb-2 max-w-[15rem] whitespace-pre-wrap break-words rounded-2xl border border-zinc-200 bg-zinc-50 px-3 py-1.5 text-center text-sm leading-snug text-zinc-700 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300">
             {bubbleText}
           </div>
         )}
@@ -1326,7 +1326,7 @@ export default function Pet({
             <div className="max-w-[12rem] truncate text-sm text-zinc-500">
               {session.config.task}
             </div>
-            <div className="text-lg tabular-nums text-zinc-800">
+            <div className="text-lg tabular-nums text-zinc-800 dark:text-zinc-200">
               {fmtClock(focusLeft)}
             </div>
             <div className="text-xs uppercase tracking-wider text-zinc-400">
@@ -1337,7 +1337,7 @@ export default function Pet({
           <div className="mb-1 flex flex-col items-center">
             <div className="h-4 text-sm">
               {remaining <= 0 ? (
-                <span className="text-emerald-600">[Enter]</span>
+                <span className="text-emerald-600 dark:text-emerald-400">[Enter]</span>
               ) : (
                 <span className="text-zinc-400">
                   (min {remaining} character{remaining === 1 ? "" : "s"})
@@ -1352,7 +1352,7 @@ export default function Pet({
               maxLength={NAME_MAX}
               spellCheck={false}
               aria-label="Name your companion"
-              className="w-32 bg-transparent text-center font-mono text-[17px] text-zinc-800 outline-none"
+              className="w-32 bg-transparent text-center font-mono text-[17px] text-zinc-800 outline-none dark:text-zinc-200"
             />
           </div>
         ) : name ? (
@@ -1406,19 +1406,19 @@ export default function Pet({
       {showLog && transcriptLen > 0 && (
         <div
           ref={logRef}
-          className="absolute inset-x-4 top-4 bottom-12 z-20 overflow-y-auto rounded-lg border border-zinc-200 bg-white/95 p-3 text-left text-sm leading-relaxed shadow-sm"
+          className="absolute inset-x-4 top-4 bottom-12 z-20 overflow-y-auto rounded-lg border border-zinc-200 bg-white/95 p-3 dark:border-zinc-800 dark:bg-zinc-950/95 text-left text-sm leading-relaxed shadow-sm"
         >
           {pet.transcript().map((m, i) => (
             <p key={i} className={i ? "mt-1.5" : ""}>
-              <span className={m.role === "user" ? "text-zinc-400" : "text-emerald-700"}>
+              <span className={m.role === "user" ? "text-zinc-400" : "text-emerald-700 dark:text-emerald-400"}>
                 {m.role === "user" ? "you" : name || "pet"}:{" "}
               </span>
-              <span className="whitespace-pre-wrap break-words text-zinc-700">
+              <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
                 {m.content}
               </span>
             </p>
           ))}
-          <div className="sticky bottom-0 mt-2 bg-white/95 pt-1 text-center text-xs text-zinc-400">
+          <div className="sticky bottom-0 mt-2 bg-white/95 pt-1 dark:bg-zinc-950/95 text-center text-xs text-zinc-400">
             esc · l to close
           </div>
         </div>
@@ -1445,17 +1445,17 @@ export default function Pet({
               placeholder="say something…"
               spellCheck={false}
               aria-label="Talk to your pet"
-              className="w-64 bg-transparent text-zinc-800 outline-none placeholder:text-zinc-300"
+              className="w-64 bg-transparent text-zinc-800 outline-none placeholder:text-zinc-300 dark:text-zinc-200 dark:placeholder:text-zinc-600"
             />
-            <span className="select-none text-zinc-300">enter · esc</span>
+            <span className="select-none text-zinc-300 dark:text-zinc-600">enter · esc</span>
           </div>
         ) : (
           <div className="mt-8 select-none text-center text-sm text-zinc-400">
             {confirmQuit && session ? (
               <span>
                 leave “{session.config.task}”? this block isn’t done ·{" "}
-                <span className="text-zinc-600">y</span> /{" "}
-                <span className="text-zinc-600">n</span>
+                <span className="text-zinc-600 dark:text-zinc-400">y</span> /{" "}
+                <span className="text-zinc-600 dark:text-zinc-400">n</span>
               </span>
             ) : session ? (
               <span>
@@ -1475,7 +1475,7 @@ export default function Pet({
                         rootRef.current?.focus(); // keep the keyboard on the pet
                       }}
                       aria-expanded={showLog}
-                      className="text-zinc-500 transition-colors hover:text-zinc-700"
+                      className="text-zinc-500 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
                     >
                       {showLog ? "▾" : "▸"} log
                     </button>

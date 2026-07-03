@@ -115,7 +115,7 @@ export default function TerminalPopup() {
 
   return (
     <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center bg-zinc-900/20 backdrop-blur-sm transition-opacity duration-200 ease-out ${
+      className={`fixed inset-0 z-[60] flex items-center justify-center bg-zinc-900/20 backdrop-blur-sm dark:bg-zinc-950/50 transition-opacity duration-200 ease-out ${
         visible ? "opacity-100" : "opacity-0"
       }`}
       onClick={close}
@@ -125,7 +125,7 @@ export default function TerminalPopup() {
       <div style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}>
         <div
           ref={windowRef}
-          className={`flex h-[480px] max-h-[90vh] min-h-[220px] w-[44rem] min-w-[320px] max-w-[95vw] resize flex-col overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-2xl ring-1 ring-black/5 transition duration-200 ease-out ${
+          className={`flex h-[480px] max-h-[90vh] min-h-[220px] w-[44rem] min-w-[320px] max-w-[95vw] resize flex-col overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-2xl ring-1 ring-black/5 dark:border-zinc-700 dark:bg-zinc-950 dark:ring-white/10 transition duration-200 ease-out ${
             visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
           }`}
           onClick={(e) => e.stopPropagation()}
@@ -171,7 +171,7 @@ function TitleBar({
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
-      className="flex cursor-move touch-none select-none items-center gap-2 border-b border-zinc-200 bg-zinc-100 px-3 py-2"
+      className="flex cursor-move touch-none select-none items-center gap-2 border-b border-zinc-200 bg-zinc-100 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900"
     >
       <div className="flex items-center gap-1.5">
         <button

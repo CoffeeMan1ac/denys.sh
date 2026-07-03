@@ -12,7 +12,7 @@ export default function AboutPage() {
   return (
     <div>
       <h1 className="text-3xl font-semibold tracking-tight">About</h1>
-      <p className="mt-2 text-zinc-600">
+      <p className="mt-2 text-zinc-600 dark:text-zinc-400">
         I&rsquo;m Denys, a Computer Science &amp; Economics student at Trinity
         College Dublin, working as a developer and systems administrator.
       </p>

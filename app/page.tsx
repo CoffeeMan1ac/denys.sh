@@ -25,7 +25,7 @@ export default function Home() {
             below the description. */}
         <div className="mx-auto mt-24 flex w-full max-w-4xl items-start justify-between gap-8">
           <div>
-            <p className="text-2xl text-zinc-600">
+            <p className="text-2xl text-zinc-600 dark:text-zinc-400">
               Hi, I&apos;m Denys. I build things people use, working across
               backend and front end. I think in patterns and pictures, so
               you&apos;ll catch me sketching a problem on paper until the thing
@@ -60,11 +60,11 @@ export default function Home() {
               </svg>
               .
             </p>
-            <p className="mt-4 text-2xl text-zinc-600">
+            <p className="mt-4 text-2xl text-zinc-600 dark:text-zinc-400">
               Happy to chat or take on work; you can reach me via{" "}
               <a
                 href={`mailto:${EMAIL}`}
-                className="underline underline-offset-4 hover:text-black"
+                className="underline underline-offset-4 hover:text-black dark:hover:text-white"
               >
                 Email
               </a>
@@ -76,7 +76,7 @@ export default function Home() {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-4 hover:text-black"
+                    className="underline underline-offset-4 hover:text-black dark:hover:text-white"
                   >
                     {link.label}
                   </a>
@@ -87,7 +87,7 @@ export default function Home() {
                 href="https://cal.eu/denys/call"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-4 hover:text-black"
+                className="underline underline-offset-4 hover:text-black dark:hover:text-white"
               >
                 Cal
               </a>
@@ -113,7 +113,7 @@ export default function Home() {
               href="https://cal.eu/denys/call"
               target="_blank"
               rel="noopener noreferrer"
-              className="underline underline-offset-4 hover:text-black"
+              className="underline underline-offset-4 hover:text-black dark:hover:text-white"
             >
               Cal
             </a>
@@ -122,7 +122,7 @@ export default function Home() {
             or reach me at{" "}
             <a
               href="mailto:me@denys.sh"
-              className="underline underline-offset-4 hover:text-black"
+              className="underline underline-offset-4 hover:text-black dark:hover:text-white"
             >
               me@denys.sh
             </a>
