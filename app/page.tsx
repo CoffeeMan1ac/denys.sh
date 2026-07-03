@@ -64,6 +64,8 @@ export default function Home() {
               Happy to chat or take on work; you can reach me via{" "}
               <a
                 href={`mailto:${EMAIL}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="underline underline-offset-4 hover:text-black dark:hover:text-white"
               >
                 Email
@@ -122,6 +124,8 @@ export default function Home() {
             or reach me at{" "}
             <a
               href="mailto:me@denys.sh"
+              target="_blank"
+              rel="noopener noreferrer"
               className="underline underline-offset-4 hover:text-black dark:hover:text-white"
             >
               me@denys.sh

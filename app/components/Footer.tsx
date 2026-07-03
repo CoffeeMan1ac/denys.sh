@@ -60,7 +60,7 @@ export default function Footer() {
               <a
                 key={link.href}
                 href={link.href}
-                {...(external
+                {...(external || link.href.startsWith("mailto:")
                   ? { target: "_blank", rel: "noopener noreferrer" }
                   : {})}
                 className={className}
