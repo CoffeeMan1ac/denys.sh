@@ -14,6 +14,19 @@ function argFor(pathname: string): string {
   return pathname.split("/")[1] ?? "";
 }
 
+// Only real top-level pages type in as the script's argument,
+// so a 404 can't echo an unsuitable path.
+const KNOWN_PAGES = new Set([
+  "showcase",
+  "projects",
+  "writing",
+  "resume",
+  "colophon",
+  "terminal",
+  "blog",
+  "about",
+]);
+
 function prefersReducedMotion(): boolean {
   return (
     typeof window !== "undefined" &&
@@ -23,7 +36,8 @@ function prefersReducedMotion(): boolean {
 
 export default function BrandPrompt() {
   const pathname = usePathname();
-  const isHome = pathname === "/";
+  // Unknown paths render bare, same as home.
+  const bare = pathname === "/" || !KNOWN_PAGES.has(argFor(pathname));
 
   const [typed, setTyped] = useState("");
   // The caret holds steady while typing and blinks only once typing is done.
@@ -40,8 +54,8 @@ export default function BrandPrompt() {
   }
 
   useEffect(() => {
-    // On home, type the script name itself; elsewhere, type the page argument.
-    const target = pathname === "/" ? "denys.sh" : argFor(pathname);
+    // Bare (home/unknown): type the script name itself. Known page: type its argument.
+    const target = bare ? "denys.sh" : argFor(pathname);
 
     if (prefersReducedMotion() || !target) {
       // Skip the animation, land on the final state. Deferred to a timer so it
@@ -64,16 +78,16 @@ export default function BrandPrompt() {
     }, TYPE_MS);
 
     return () => window.clearInterval(id);
-  }, [pathname]);
+  }, [pathname, bare]);
 
   return (
     <span className="inline-flex items-baseline">
       <span className="text-zinc-400">~&nbsp;$&nbsp;</span>
-      {isHome ? (
-        // Home: denys.sh types itself out.
+      {bare ? (
+        // Home/unknown: denys.sh types itself out.
         <span>{typed}</span>
       ) : (
-        // Other pages: denys.sh static, page name types in as the argument.
+        // Known pages: denys.sh static, page name types in as the argument.
         <>
           denys.sh
           {typed && (
