@@ -125,7 +125,7 @@ export default function TerminalPopup() {
       <div style={{ transform: `translate(${offset.x}px, ${offset.y}px)` }}>
         <div
           ref={windowRef}
-          className={`flex h-[480px] max-h-[90vh] min-h-[220px] w-[44rem] min-w-[320px] max-w-[95vw] resize flex-col overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-2xl ring-1 ring-black/5 dark:border-zinc-700 dark:bg-zinc-950 dark:ring-white/10 transition duration-200 ease-out ${
+          className={`flex h-[480px] max-h-[85dvh] min-h-[220px] w-[44rem] min-w-[min(320px,calc(100vw-2rem))] max-w-[calc(100vw-2rem)] resize flex-col overflow-hidden rounded-lg border border-zinc-300 bg-white shadow-2xl ring-1 ring-black/5 dark:border-zinc-700 dark:bg-zinc-950 dark:ring-white/10 transition duration-200 ease-out ${
             visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
           }`}
           onClick={(e) => e.stopPropagation()}
