@@ -16,6 +16,17 @@ export default function TerminalPopup() {
   const pathname = usePathname();
   const router = useRouter();
 
+  // Phones get a fullscreen takeover instead of a floating window; the mac
+  // window chrome (drag, resize, traffic lights) is desktop-only.
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 639px)");
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
   // Drag offset from the centered origin, and the in-flight drag anchor.
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const dragRef = useRef<{ sx: number; sy: number; ox: number; oy: number } | null>(
@@ -112,6 +123,41 @@ export default function TerminalPopup() {
 
   // The popup is redundant on the fullscreen terminal route.
   if (pathname === "/terminal" || !render) return null;
+
+  if (isMobile) {
+    return (
+      <div
+        className={`fixed inset-0 z-[60] flex flex-col bg-white transition-transform duration-200 ease-out dark:bg-zinc-950 ${
+          visible ? "translate-y-0" : "translate-y-full"
+        }`}
+      >
+        <div className="flex items-center justify-between border-b border-zinc-200 bg-zinc-100 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900">
+          <button
+            type="button"
+            onClick={exit}
+            aria-label="Exit terminal"
+            className="font-mono text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+          >
+            exit
+          </button>
+          <span className="font-mono text-xs text-zinc-500">
+            guest@denys.sh — terminal
+          </span>
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close terminal"
+            className="-mr-1 p-1 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+          >
+            <Icon icon="mdi:close" className="h-5 w-5" aria-hidden />
+          </button>
+        </div>
+        <div className="min-h-0 flex-1">
+          <TerminalView />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
