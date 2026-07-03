@@ -19,7 +19,9 @@ const navLinks = [
 export default function Header() {
   return (
     <header>
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2">
+      {/* Single row from sm up; on phones the brand takes its own line and the
+          nav wraps below it. */}
+      <div className="mx-auto flex max-w-5xl flex-col gap-1 px-6 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:py-2">
         {/* Brand is denys.sh as a runnable script: clicking runs it bare (home);
             BrandPrompt types the current page in as the script's argument. */}
         <Link
@@ -28,7 +30,7 @@ export default function Header() {
         >
           <BrandPrompt />
         </Link>
-        <nav className="flex flex-wrap justify-end gap-x-4 gap-y-1 text-xl text-zinc-600 dark:text-zinc-400">
+        <nav className="flex flex-wrap gap-x-4 gap-y-1 text-lg text-zinc-600 sm:justify-end sm:text-xl dark:text-zinc-400">
           {navLinks.map((link) => (
             <Link
               key={link.href}
