@@ -13,12 +13,12 @@ export default function SectionNav() {
         <Link
           key={section.href}
           href={section.href}
-          className="group flex min-h-40 flex-col items-start rounded border border-zinc-200 p-6 shadow-sm transition hover:shadow-md active:translate-y-px active:bg-zinc-50 active:shadow-none dark:border-zinc-800 dark:hover:border-zinc-600 dark:active:bg-zinc-900"
+          className="group flex min-h-28 flex-col items-start rounded border border-zinc-200 p-5 shadow-sm transition hover:shadow-md active:translate-y-px active:bg-zinc-50 active:shadow-none sm:min-h-40 sm:p-6 dark:border-zinc-800 dark:hover:border-zinc-600 dark:active:bg-zinc-900"
         >
-          <span className="text-4xl font-medium text-zinc-700 underline-offset-4 group-hover:text-black group-hover:underline dark:text-zinc-300 dark:group-hover:text-white">
+          <span className="text-3xl font-medium text-zinc-700 underline-offset-4 group-hover:text-black group-hover:underline sm:text-4xl dark:text-zinc-300 dark:group-hover:text-white">
             {section.label}
           </span>
-          <span className="mt-1 text-xl text-zinc-500">{section.blurb}</span>
+          <span className="mt-1 text-lg text-zinc-500 sm:text-xl">{section.blurb}</span>
         </Link>
       ))}
     </nav>
