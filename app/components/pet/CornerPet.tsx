@@ -315,7 +315,8 @@ export default function CornerPet() {
   const aff = pet.liveAffection(affection.current.value, affection.current.at, now);
 
   let phase = "awake";
-  if (pending) phase = "thinking";
+  if (naming) phase = "awake"; // stay alert while being named, never dozing
+  else if (pending) phase = "thinking";
   else if (inputFocused) phase = "talking"; // attentive while the cursor is in the field
   else if (now < missUntil.current) phase = "missed";
   else if (now < overstimUntil.current) phase = "dizzy";
@@ -361,7 +362,7 @@ export default function CornerPet() {
       <div className="absolute bottom-full left-1/2 mb-1 flex -translate-x-1/2 flex-col items-center gap-1">
         {naming ? (
           <div className="flex flex-col items-center">
-            <div className="h-4 text-sm">
+            <div className="h-7 whitespace-nowrap text-xl">
               {nameRemaining <= 0 ? (
                 <span className="text-emerald-600 dark:text-emerald-400">[Enter]</span>
               ) : (
@@ -382,9 +383,8 @@ export default function CornerPet() {
               }}
               maxLength={pet.NAME_MAX}
               spellCheck={false}
-              placeholder="name me"
               aria-label="Name the pet"
-              className="w-32 bg-transparent text-center text-base text-zinc-800 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-200 dark:caret-zinc-400"
+              className="w-32 bg-transparent text-center text-base text-zinc-800 caret-zinc-600 outline-none dark:text-zinc-200 dark:caret-zinc-400"
             />
           </div>
         ) : (
@@ -451,7 +451,7 @@ export default function CornerPet() {
         role="button"
         aria-label={name ? `Boop ${name}` : "Boop the pet"}
         onClick={boop}
-        className="flex cursor-pointer flex-col items-center text-2xl leading-tight"
+        className="flex cursor-pointer flex-col items-center text-3xl leading-tight"
       >
         <div className={`h-5 whitespace-pre text-center text-sm ${face.bubble?.tone ?? ""}`}>
           {face.bubble?.text ?? ""}
