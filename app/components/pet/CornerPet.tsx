@@ -480,7 +480,10 @@ export default function CornerPet() {
         maxLength={pet.NAME_MAX}
         spellCheck={false}
         aria-label="Name the pet"
-        className="w-40 border-b border-zinc-400 bg-transparent text-center text-xl text-zinc-800 caret-zinc-600 outline-none dark:border-zinc-600 dark:text-zinc-200 dark:caret-zinc-400"
+        // Half the old width when empty, growing a character at a time (ch
+        // tracks the mono glyph width) so the underline follows the name.
+        style={{ width: `max(5rem, ${nameDraft.length + 1}ch)` }}
+        className="border-b border-zinc-400 bg-transparent text-center text-xl text-zinc-800 caret-zinc-600 outline-none transition-[width] duration-150 dark:border-zinc-600 dark:text-zinc-200 dark:caret-zinc-400"
       />
     </div>
   );

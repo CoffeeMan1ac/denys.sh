@@ -12,7 +12,7 @@ export type PetSave = {
 
 // naming
 export const NAME_MIN = 2;
-export const NAME_MAX = 16;
+export const NAME_MAX = 12;
 export const NAME_ALLOWED = /[^\p{L}\p{N} _-]/gu; // strip anything but letters/digits/space/_-
 
 // timing / mood (ms)
