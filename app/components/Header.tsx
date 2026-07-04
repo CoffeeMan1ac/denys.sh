@@ -6,6 +6,7 @@ import { Icon } from "@/app/components/Icon";
 import TerminalTrigger from "./terminal/TerminalTrigger";
 import BrandPrompt from "./BrandPrompt";
 import ThemeToggle, { toggleTheme } from "./ThemeToggle";
+import * as pet from "@/lib/pet/core";
 
 const navLinks = [
   { href: "/showcase", label: "Showcase" },
@@ -20,6 +21,19 @@ const navLinks = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [petName, setPetName] = useState("");
+
+  // Read the pet's stored name as the drawer opens, to label the Pet entry.
+  function openMenu() {
+    const s = pet.loadPet();
+    setPetName(typeof s?.name === "string" ? s.name : "");
+    setMenuOpen(true);
+  }
+
+  function openPet() {
+    setMenuOpen(false);
+    window.dispatchEvent(new Event("pet:open"));
+  }
 
   // Close the drawer on Escape.
   useEffect(() => {
@@ -67,7 +81,7 @@ export default function Header() {
         </nav>
         <button
           type="button"
-          onClick={() => setMenuOpen(true)}
+          onClick={openMenu}
           aria-label="Open menu"
           aria-expanded={menuOpen}
           className="-mr-2 shrink-0 p-2 text-zinc-600 sm:hidden dark:text-zinc-400"
@@ -120,9 +134,19 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            <button
+              type="button"
+              onClick={openPet}
+              className="flex items-center gap-1.5 py-2 hover:text-black dark:hover:text-white"
+            >
+              Pet
+              <Icon icon="mdi:paw" className="h-5 w-5 -rotate-[30deg]" aria-hidden />
+              {!petName && <span className="text-zinc-400">(name it!)</span>}
+            </button>
+            {/* Hidden.
             <span className="py-2">
               <TerminalTrigger variant="nav" />
-            </span>
+            </span> */}
           </nav>
           {/* Whole row toggles the theme: a finger-friendly tap target. Outside
               the closing nav so flipping the theme keeps the drawer open. */}

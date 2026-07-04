@@ -107,6 +107,16 @@ export default function CornerPet() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
+  // The nav drawer's Pet entry opens the pet, jumping into naming when unnamed.
+  useEffect(() => {
+    const open = () => {
+      setSheetOpen(true);
+      if (!nameRef.current) setNaming(true);
+    };
+    window.addEventListener("pet:open", open);
+    return () => window.removeEventListener("pet:open", open);
+  }, []);
+
   // Closing the sheet mid-naming drops back to the badged launcher.
   function closeSheet() {
     setSheetOpen(false);
@@ -359,34 +369,13 @@ export default function CornerPet() {
   // Hidden until hydrated, and on the full-screen terminal route.
   if (!hydrated || onTerminalRoute) return null;
 
-  // No name yet, and not naming: the nudge (a badged launcher on phones, which
-  // opens the sheet straight into naming). On desktop, clicking summons the pet
-  // right here with the name field focused. Centered on the pet's spot
+  // No name yet, and not naming: the desktop nudge. Clicking summons the pet
+  // right here with the name field focused, centered on the pet's spot
   // (translateX so its own width doesn't shift it). A single bright character
-  // crawls left to right across the line, snake-style.
+  // crawls left to right, snake-style. Phones have no nudge here; naming is
+  // reached from the nav drawer's Pet entry.
   if (!name && !naming) {
-    if (isMobile) {
-      return (
-        <button
-          type="button"
-          onClick={() => {
-            setNaming(true);
-            setSheetOpen(true);
-          }}
-          aria-label="Name the pet"
-          style={{ transform: `translateY(-${lift}px)` }}
-          className="fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-white font-mono text-sm text-zinc-600 shadow-lg ring-1 ring-zinc-200 dark:bg-zinc-900 dark:text-zinc-400 dark:ring-zinc-700"
-        >
-          <span aria-hidden className="whitespace-pre">
-            {"(?.?)"}
-          </span>
-          <span
-            aria-hidden
-            className="absolute right-0.5 top-0.5 h-2.5 w-2.5 rounded-full bg-amber-400"
-          />
-        </button>
-      );
-    }
+    if (isMobile) return null;
     const lead = "psst — name me! ";
     const tail = "(click!)";
     const snake = Math.floor(Date.now() / 110) % (lead.length + tail.length);
@@ -637,24 +626,25 @@ export default function CornerPet() {
     </div>
   );
 
-  // Phones: a live-chat style launcher showing the pet's live eyes; the full
-  // pet opens in a bottom sheet so it never sits over the page content.
+  // Phones: a paw launcher, only once named (unnamed pets are reached from the
+  // nav drawer). The full pet opens in a bottom sheet so it never sits over the
+  // page content.
   if (isMobile) {
     return (
       <>
-        <button
-          type="button"
-          onClick={() => setSheetOpen(true)}
-          aria-label={name ? `Open ${name}` : "Name the pet"}
-          style={{ transform: `translateY(-${lift}px)` }}
-          className={`fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full bg-white font-mono text-xs text-zinc-700 shadow-lg ring-1 ring-zinc-200 transition-opacity dark:bg-zinc-900 dark:text-zinc-300 dark:ring-zinc-700 ${
-            sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"
-          }`}
-        >
-          <span aria-hidden className="whitespace-pre">
-            {face.eyes}
-          </span>
-        </button>
+        {name && (
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            aria-label={`Open ${name}`}
+            style={{ transform: `translateY(-${lift}px)` }}
+            className={`fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full border border-white/50 bg-white/40 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-opacity dark:border-white/10 dark:bg-zinc-900/40 ${
+              sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"
+            }`}
+          >
+            <Icon icon="mdi:paw" className="h-6 w-6 -rotate-[30deg]" aria-hidden />
+          </button>
+        )}
         {/* Sheet, always mounted so it can slide; inert while closed. */}
         <div
           className={`fixed inset-0 z-50 ${sheetOpen ? "" : "pointer-events-none"}`}

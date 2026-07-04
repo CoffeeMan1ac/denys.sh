@@ -22,6 +22,7 @@ import fountainPenTip from "@iconify-icons/mdi/fountain-pen-tip";
 import menu from "@iconify-icons/mdi/menu";
 import minus from "@iconify-icons/mdi/minus";
 import notebookOutline from "@iconify-icons/mdi/notebook-outline";
+import paw from "@iconify-icons/mdi/paw";
 import refresh from "@iconify-icons/mdi/refresh";
 import send from "@iconify-icons/mdi/send";
 import starOutline from "@iconify-icons/mdi/star-outline";
@@ -41,6 +42,7 @@ const registry = {
   "mdi:menu": menu,
   "mdi:minus": minus,
   "mdi:notebook-outline": notebookOutline,
+  "mdi:paw": paw,
   "mdi:refresh": refresh,
   "mdi:send": send,
   "mdi:star-outline": starOutline,
