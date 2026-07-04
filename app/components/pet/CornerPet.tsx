@@ -293,17 +293,33 @@ export default function CornerPet() {
   if (!hydrated || onTerminalRoute) return null;
 
   // No name yet, and not naming: the nudge. Clicking summons the pet right here
-  // with the name field focused.
+  // with the name field focused. Centered on the pet's spot (translateX so its
+  // own width doesn't shift it). A single bright character crawls left to right
+  // across the line, snake-style.
   if (!name && !naming) {
+    const lead = "psst — name me! ";
+    const tail = "(click!)";
+    const snake = Math.floor(Date.now() / 110) % (lead.length + tail.length);
+    const glow = "text-zinc-900 dark:text-white";
     return (
       <button
         type="button"
         onClick={() => setNaming(true)}
-        style={{ transform: `translateY(-${lift}px)` }}
-        className="fixed bottom-4 right-32 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
+        style={{ transform: `translateX(50%) translateY(-${lift}px)` }}
+        className="fixed bottom-4 right-52 z-40 cursor-pointer whitespace-nowrap text-2xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
       >
-        psst — name me!{" "}
-        <span className="font-semibold text-zinc-700 dark:text-zinc-300">(click!)</span>
+        {[...lead].map((ch, i) => (
+          <span key={i} className={i === snake ? glow : undefined}>
+            {ch}
+          </span>
+        ))}
+        <span className="font-semibold text-zinc-700 dark:text-zinc-300">
+          {[...tail].map((ch, i) => (
+            <span key={i} className={lead.length + i === snake ? glow : undefined}>
+              {ch}
+            </span>
+          ))}
+        </span>
       </button>
     );
   }
