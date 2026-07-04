@@ -57,6 +57,9 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Lets phones on the LAN load dev assets (Next blocks cross-origin dev
+  // requests by default). Dev-only; ignored in production builds.
+  allowedDevOrigins: ["192.168.0.183"],
   // Don't advertise the framework.
   poweredByHeader: false,
   // gzip/brotli compression for responses.

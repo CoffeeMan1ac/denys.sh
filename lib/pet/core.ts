@@ -1,8 +1,6 @@
-// Shared brain + look for the pet. The terminal Pet and the on-page CornerPet
-// both use this so they behave as one creature: same name, mood, and face.
-// No React here, just logic. The localStorage helpers merge rather than
-// overwrite, so neither surface wipes fields it doesn't own (e.g. the corner
-// won't clobber the terminal's focus session).
+// Brain + look for the on-page CornerPet. No React here, just logic. The
+// localStorage helpers merge rather than overwrite, so a partial save (e.g. just
+// lastSeen) never wipes the fields it leaves out.
 
 export const PET_KEY = "terminal:pet";
 
@@ -10,9 +8,12 @@ export type PetSave = {
   name?: string;
   affection?: number;
   lastSeen?: number;
-  // Owned by the terminal; the corner leaves this untouched.
-  focus?: unknown;
 };
+
+// naming
+export const NAME_MIN = 2;
+export const NAME_MAX = 16;
+export const NAME_ALLOWED = /[^\p{L}\p{N} _-]/gu; // strip anything but letters/digits/space/_-
 
 // timing / mood (ms)
 export const BOOP_MS = 1300;

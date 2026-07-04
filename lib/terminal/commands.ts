@@ -30,7 +30,6 @@ type CommandResult = {
   status: number; // 0 = success (bash exit status)
   cwd?: string; // set when the working directory changes
   clear?: boolean; // wipe the scrollback (`clear` / Ctrl-L)
-  launch?: string; // hand control to an interactive program (e.g. `pet`)
   exit?: boolean; // close the terminal and reset the session (like a refresh)
 };
 

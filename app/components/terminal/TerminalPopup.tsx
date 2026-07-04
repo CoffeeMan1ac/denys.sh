@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Icon } from "@/app/components/Icon";
+import { useKeyboardInset } from "@/app/components/useKeyboardInset";
 import { useTerminal } from "./TerminalProvider";
 import TerminalView from "./TerminalView";
 
@@ -26,6 +27,9 @@ export default function TerminalPopup() {
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, []);
+  // Lifts the takeover's bottom edge above the on-screen keyboard where the
+  // browser overlays it, keeping the prompt line visible.
+  const keyboardInset = useKeyboardInset(isMobile && isOpen);
 
   // Drag offset from the centered origin, and the in-flight drag anchor.
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -127,6 +131,7 @@ export default function TerminalPopup() {
   if (isMobile) {
     return (
       <div
+        style={keyboardInset ? { bottom: keyboardInset } : undefined}
         className={`fixed inset-0 z-[60] flex flex-col bg-white transition-transform duration-200 ease-out dark:bg-zinc-950 ${
           visible ? "translate-y-0" : "translate-y-full"
         }`}

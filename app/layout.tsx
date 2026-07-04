@@ -83,6 +83,10 @@ export const viewport: Viewport = {
     { media: "(prefers-color-scheme: light)", color: THEME_COLOR },
     { media: "(prefers-color-scheme: dark)", color: THEME_COLOR_DARK },
   ],
+  // The on-screen keyboard shrinks the layout viewport instead of overlaying
+  // it, so bottom-fixed surfaces (pet sheet, terminal prompt) stay visible.
+  // Safari ignores this; useKeyboardInset covers it there.
+  interactiveWidget: "resizes-content",
 };
 
 export default function RootLayout({
