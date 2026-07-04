@@ -444,7 +444,7 @@ export default function CornerPet() {
             rows={1}
             spellCheck={false}
             aria-label={`Talk to ${name}`}
-            className="w-40 resize-none overflow-hidden bg-transparent text-center text-2xl leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
+            className="w-40 resize-none overflow-hidden bg-transparent text-center text-xl leading-normal text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
           />
           {turns > 0 && (
             <button
@@ -472,7 +472,7 @@ export default function CornerPet() {
         <div className={`h-6 whitespace-pre text-center text-base ${face.bubble?.tone ?? ""}`}>
           {face.bubble?.text ?? ""}
         </div>
-        {name && <div className="mb-0.5 text-2xl text-zinc-500">{name}</div>}
+        {name && <div className="mb-0.5 text-xl text-zinc-500">{name}</div>}
         {topper && <div className="leading-none">{topper}</div>}
         {breathe && <div className="h-1" aria-hidden />}
         <div className="whitespace-pre">{face.ears}</div>
