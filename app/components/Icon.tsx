@@ -23,6 +23,7 @@ import menu from "@iconify-icons/mdi/menu";
 import minus from "@iconify-icons/mdi/minus";
 import notebookOutline from "@iconify-icons/mdi/notebook-outline";
 import refresh from "@iconify-icons/mdi/refresh";
+import send from "@iconify-icons/mdi/send";
 import starOutline from "@iconify-icons/mdi/star-outline";
 import trayArrowDown from "@iconify-icons/mdi/tray-arrow-down";
 import weatherNight from "@iconify-icons/mdi/weather-night";
@@ -41,6 +42,7 @@ const registry = {
   "mdi:minus": minus,
   "mdi:notebook-outline": notebookOutline,
   "mdi:refresh": refresh,
+  "mdi:send": send,
   "mdi:star-outline": starOutline,
   "mdi:tray-arrow-down": trayArrowDown,
   "mdi:weather-night": weatherNight,

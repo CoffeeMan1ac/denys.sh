@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { Icon } from "@/app/components/Icon";
+import { useKeyboardInset } from "@/app/components/useKeyboardInset";
 import { useTerminal } from "../terminal/TerminalProvider";
 import * as pet from "@/lib/pet/core";
 
@@ -57,6 +59,8 @@ export default function CornerPet() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetDragY, setSheetDragY] = useState(0); // grab handle: px dragged down
   const sheetDragRef = useRef<number | null>(null); // pointer's start Y
+  // Lifts the sheet above the on-screen keyboard where the browser overlays it.
+  const keyboardInset = useKeyboardInset(isMobile && sheetOpen);
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -448,9 +452,42 @@ export default function CornerPet() {
     </div>
   );
 
-  // Talk field, with a toggle to its right (out of flow, so the field stays
-  // centered over the pet) to reveal the conversation.
-  const talkRow = (
+  // Talk field. In the sheet it's a chat-app composer: a pill with a growing
+  // field and a send button. On desktop it stays the bare centered field, with
+  // a toggle to its right (out of flow, so the field stays centered over the
+  // pet) to reveal the conversation.
+  const talkRow = isMobile ? (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        void sendMessage(chatDraft);
+      }}
+      className="flex w-full items-end gap-2 rounded-3xl bg-zinc-100 py-2 pl-4 pr-2 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+    >
+      <textarea
+        ref={chatRef}
+        value={chatDraft}
+        onChange={(e) => setChatDraft(e.target.value)}
+        onKeyDown={onChatKeyDown}
+        onFocus={() => setInputFocused(true)}
+        onBlur={() => setInputFocused(false)}
+        maxLength={pet.CHAT_MAX}
+        placeholder={`message ${name}`}
+        rows={1}
+        spellCheck={false}
+        aria-label={`Talk to ${name}`}
+        className="max-h-32 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-300 dark:caret-zinc-400"
+      />
+      <button
+        type="submit"
+        disabled={!chatDraft.trim() || pending}
+        aria-label={`Send to ${name}`}
+        className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-zinc-800 text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
+      >
+        <Icon icon="mdi:send" className="h-4 w-4" aria-hidden />
+      </button>
+    </form>
+  ) : (
     <div className="relative flex items-center">
       <textarea
         ref={chatRef}
@@ -464,11 +501,9 @@ export default function CornerPet() {
         rows={1}
         spellCheck={false}
         aria-label={`Talk to ${name}`}
-        className={`resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400 ${
-          isMobile ? "w-64" : "w-40"
-        }`}
+        className="w-40 resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
       />
-      {!isMobile && turns > 0 && (
+      {turns > 0 && (
         <button
           type="button"
           onClick={() => setShowLog((v) => !v)}
@@ -540,7 +575,15 @@ export default function CornerPet() {
             onClick={() => setSheetOpen(false)}
           />
           <div
-            style={sheetDragY ? { transform: `translateY(${sheetDragY}px)` } : undefined}
+            style={{
+              ...(sheetDragY ? { transform: `translateY(${sheetDragY}px)` } : undefined),
+              ...(keyboardInset
+                ? {
+                    bottom: keyboardInset,
+                    maxHeight: `calc(85dvh - ${keyboardInset}px)`,
+                  }
+                : undefined),
+            }}
             className={`absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col items-center gap-2 rounded-t-2xl border-t border-zinc-200 bg-white px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-1.5 font-mono text-zinc-700 shadow-2xl ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
               sheetDragY ? "" : "transition-transform duration-200"
             } ${sheetOpen ? "translate-y-0" : "translate-y-full"}`}
@@ -560,7 +603,7 @@ export default function CornerPet() {
             </div>
             {transcriptPanel}
             <div className="shrink-0">{figure}</div>
-            <div className="shrink-0">{talkRow}</div>
+            <div className="w-full shrink-0">{talkRow}</div>
           </div>
         </div>
       </>
