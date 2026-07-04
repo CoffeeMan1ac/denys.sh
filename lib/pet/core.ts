@@ -70,18 +70,6 @@ export const BOOP_REACTIONS = [
   { eyes: "( =w= )", tag: "~mrr" },
 ];
 
-// Small cosmetic worn above the head on a few holidays.
-export function holidayTopper(now: number): string | null {
-  const d = new Date(now);
-  const m = d.getMonth() + 1;
-  const day = d.getDate();
-  if ((m === 12 && day === 31) || (m === 1 && day === 1)) return "🎉";
-  if (m === 10 && day === 31) return "🎃";
-  if (m === 7 && day === 4) return "🎆";
-  if (m === 12 && (day === 24 || day === 25)) return "🎄";
-  return null;
-}
-
 // persistence (merge, so the two surfaces don't overwrite each other)
 export function loadPet(): PetSave | null {
   try {

@@ -396,7 +396,6 @@ export default function CornerPet() {
     reaction: reaction.current,
   });
   const breathe = Math.floor(now / 1700) % 2 === 0;
-  const topper = pet.holidayTopper(now);
 
   // Reply bubble and transcript are mutually exclusive; never both at once.
   const showBubble = !showLog && (pending || (!!speech && now < speech.until));
@@ -495,7 +494,6 @@ export default function CornerPet() {
         {face.bubble?.text ?? ""}
       </div>
       <div className="mb-0.5 text-base text-zinc-500">{name}</div>
-      {topper && <div className="leading-none">{topper}</div>}
       {breathe && <div className="h-1" aria-hidden />}
       <div className="whitespace-pre">{face.ears}</div>
       {/* Tag sits to the left (inward) so it doesn't run off-screen. */}

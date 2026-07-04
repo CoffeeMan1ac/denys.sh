@@ -129,18 +129,6 @@ function pickIdle(energy: number): IdleType {
   return r < 0.34 ? "yawn" : r < 0.67 ? "stretch" : "chase";
 }
 
-// Small cosmetic worn above the head on a few holidays.
-function holidayTopper(now: number): string | null {
-  const d = new Date(now);
-  const m = d.getMonth() + 1;
-  const day = d.getDate();
-  if ((m === 12 && day === 31) || (m === 1 && day === 1)) return "🎉"; // New Year
-  if (m === 10 && day === 31) return "🎃"; // Halloween
-  if (m === 7 && day === 4) return "🎆"; // Independence Day
-  if (m === 12 && (day === 24 || day === 25)) return "🎄"; // Christmas
-  return null;
-}
-
 // focus / pomodoro
 // A configurable Pomodoro the pet sits with you through. Block lengths are the
 // user's to set, and timing is wall-clock so a backgrounded tab or reopened
@@ -1165,7 +1153,6 @@ export default function Pet({
   // Gentle breathing: bob the whole creature down a row on a slow cycle.
   const breathe = Math.floor(now / 1700) % 2 === 0;
   const remaining = NAME_MIN - draft.trim().length;
-  const topper = holidayTopper(now);
   // Ease the resize hop back to center.
   const hop =
     bump.current.until > now
@@ -1362,9 +1349,6 @@ export default function Pet({
         {/* The creature itself, sized up from the base text so the pet reads
             bigger than the surrounding name/HUD. */}
         <div className="flex flex-col items-center text-[26px] leading-tight">
-          {/* Holiday cosmetic, worn on the head and bobbing with it. */}
-          {topper && <div className="leading-none">{topper}</div>}
-
           <div className="whitespace-pre">{ears}</div>
           {/* Tag is absolutely positioned so it doesn't shift the face. */}
           <div className="relative whitespace-pre">
