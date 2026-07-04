@@ -2,23 +2,15 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTerminal } from "../terminal/TerminalProvider";
 import * as pet from "@/lib/pet/core";
 
-// The pet on the main page. Same creature as in the terminal: name, mood, look,
-// shared merged localStorage. Only one is visible at a time: while the pet
-// command runs in the terminal, this is hidden. It re-adopts the latest state
-// the terminal pet exited with. It does not appear until named.
+// The pet on the main page: name, mood, look, persisted to localStorage. It's
+// named in place (click the nudge) and doesn't appear until named. Hidden on the
+// /terminal route, a full terminal surface with no room for it.
 
 export default function CornerPet() {
-  const { activeProgram, isOpen, open, run, requestPetName } = useTerminal();
   const pathname = usePathname();
-  // The terminal owns the pet while the pet command is running, so only one copy
-  // simulates at once. Owned in two cases: the popup while the pet program runs,
-  // and the /terminal route (which covers the corner anyway). Ownership is
-  // released when the popup closes, the pet quits, or we leave /terminal.
   const onTerminalRoute = pathname === "/terminal";
-  const claimed = onTerminalRoute || (activeProgram === "pet" && isOpen);
 
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -38,15 +30,17 @@ export default function CornerPet() {
   const nextIdleAt = useRef(now0 + 7000);
   const blinkOffset = useRef(Math.random() * 3000);
   const twitchOffset = useRef(Math.random() * 5000);
-  const claimedRef = useRef(false); // true while the terminal owns the pet
   const aliveRef = useRef(true);
   const nameRef = useRef("");
   const chatLog = useRef<pet.ChatMsg[]>([]); // bounded conversation memory
   const chatRef = useRef<HTMLTextAreaElement>(null);
   const logRef = useRef<HTMLDivElement>(null); // transcript scroll container
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [naming, setNaming] = useState(false); // in-place name field is open
+  const [nameDraft, setNameDraft] = useState("");
   const [chatDraft, setChatDraft] = useState("");
   const [inputFocused, setInputFocused] = useState(false); // cursor is in the talk field
   const [showLog, setShowLog] = useState(false); // the session transcript panel
@@ -93,11 +87,9 @@ export default function CornerPet() {
     };
   }, [pathname]);
 
-  // Load the stored name/mood from localStorage. On the page's first load
-  // (initial), a gap since lastSeen over MISSED_AWAY_MS shows the "missed you"
-  // greeting. When re-adopting after the terminal releases (initial false), load
-  // the state without any greeting.
-  function hydrate(initial: boolean) {
+  // Load the stored name/mood from localStorage. A gap since lastSeen over
+  // MISSED_AWAY_MS shows the "missed you" greeting.
+  function hydrate() {
     const now = Date.now();
     const s = pet.loadPet();
     const petName = typeof s?.name === "string" ? s.name : "";
@@ -106,7 +98,7 @@ export default function CornerPet() {
     const away = now - (typeof s?.lastSeen === "number" ? s.lastSeen : now);
     const stored = typeof s?.affection === "number" ? s.affection : 0.5;
     affection.current = { value: pet.clamp(stored - away / pet.AFFECTION_DECAY_MS, 0, 1), at: now };
-    if (initial && away > pet.MISSED_AWAY_MS) {
+    if (away > pet.MISSED_AWAY_MS) {
       missUntil.current = now + pet.MISSED_SHOW_MS;
       lastInteraction.current = now;
     }
@@ -117,37 +109,25 @@ export default function CornerPet() {
       affection: pet.liveAffection(affection.current.value, affection.current.at, now),
       lastSeen: now,
     };
-    // Only write the name once we have one, so an unnamed corner can't merge
-    // name:"" over a name set elsewhere. (`claimed` already stops us saving
-    // while the terminal owns the pet; this is a second guard.)
+    // Only write the name once we have one, so an unnamed pet can't merge
+    // name:"" over a stored name.
     if (nameRef.current) patch.name = nameRef.current;
     pet.savePet(patch);
   }
 
   // Initial load.
   useEffect(() => {
-    hydrate(true);
+    hydrate();
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Save our state so the terminal pet can pick it up when it takes over, and
-  // re-adopt whatever it left when it releases.
+  // Save periodically and on unmount.
   useEffect(() => {
-    if (claimed && !claimedRef.current) saveNow();
-    else if (!claimed && claimedRef.current) hydrate(false);
-    claimedRef.current = claimed;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [claimed]);
-
-  // Save periodically and on unmount, but never while the terminal owns the pet.
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      if (!claimedRef.current) saveNow();
-    }, 5000);
+    const id = window.setInterval(saveNow, 5000);
     return () => {
       window.clearInterval(id);
-      if (!claimedRef.current) saveNow();
+      saveNow();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -155,7 +135,6 @@ export default function CornerPet() {
   // Tick: schedule unprompted idle animations and drive re-renders.
   useEffect(() => {
     const id = window.setInterval(() => {
-      if (claimedRef.current) return; // idle while the terminal owns the pet
       const now = Date.now();
       if (idleUntil.current && now >= idleUntil.current) {
         idleType.current = null;
@@ -262,6 +241,38 @@ export default function CornerPet() {
     }
   }
 
+  // naming
+  function onNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+    setNameDraft(e.target.value.replace(pet.NAME_ALLOWED, "").slice(0, pet.NAME_MAX));
+  }
+  function commitName() {
+    const trimmed = nameDraft.trim();
+    if (trimmed.length < pet.NAME_MIN) return;
+    setName(trimmed);
+    nameRef.current = trimmed;
+    saveNow();
+    setNaming(false);
+    setNameDraft("");
+    const now = Date.now();
+    lastInteraction.current = now;
+    registerBoop(now); // a happy little reaction on naming
+  }
+  function onNameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setNaming(false);
+      setNameDraft("");
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      commitName();
+    }
+  }
+
+  // Focus the name field the moment it opens.
+  useEffect(() => {
+    if (naming) nameInputRef.current?.focus();
+  }, [naming]);
+
   // Auto-size the talk field to its content: long messages wrap and grow the box
   // upward (it's anchored above the pet).
   useEffect(() => {
@@ -278,21 +289,16 @@ export default function CornerPet() {
     if (el) el.scrollTop = el.scrollHeight;
   }, [showLog, turns]);
 
-  // One at a time: stay hidden while the pet shows in the terminal.
-  if (!hydrated || claimed) return null;
+  // Hidden until hydrated, and on the full-screen terminal route.
+  if (!hydrated || onTerminalRoute) return null;
 
-  // No name yet: show a nudge. Clicking opens the terminal and runs the pet
-  // straight into its naming screen.
-  if (!name) {
+  // No name yet, and not naming: the nudge. Clicking summons the pet right here
+  // with the name field focused.
+  if (!name && !naming) {
     return (
       <button
         type="button"
-        onClick={() => {
-          // Open the terminal, launch the pet, and open the naming screen.
-          requestPetName();
-          open();
-          run("pet");
-        }}
+        onClick={() => setNaming(true)}
         style={{ transform: `translateY(-${lift}px)` }}
         className="fixed bottom-4 right-32 z-40 cursor-pointer text-xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
       >
@@ -339,6 +345,8 @@ export default function CornerPet() {
     ? ".".repeat((Math.floor(now / 350) % 3) + 1)
     : (speech?.text ?? "");
 
+  const nameRemaining = pet.NAME_MIN - nameDraft.trim().length;
+
   return (
     <div
       ref={cardRef}
@@ -347,9 +355,40 @@ export default function CornerPet() {
     >
       {/* On top of the pet: the chat input while talking, otherwise the bubble. */}
       <div className="relative flex flex-col items-center">
-      {/* Above the pet (out of flow, so the pet doesn't shift): reply bubble,
-          then the talk field. The "talk" placeholder is the only affordance. */}
+      {/* Above the pet (out of flow, so the pet doesn't shift): the name field
+          while naming, otherwise the reply bubble then the talk field. The
+          "talk" placeholder is the only affordance. */}
       <div className="absolute bottom-full left-1/2 mb-1 flex -translate-x-1/2 flex-col items-center gap-1">
+        {naming ? (
+          <div className="flex flex-col items-center">
+            <div className="h-4 text-sm">
+              {nameRemaining <= 0 ? (
+                <span className="text-emerald-600 dark:text-emerald-400">[Enter]</span>
+              ) : (
+                <span className="text-zinc-400">
+                  (min {nameRemaining} character{nameRemaining === 1 ? "" : "s"})
+                </span>
+              )}
+            </div>
+            <input
+              ref={nameInputRef}
+              value={nameDraft}
+              onChange={onNameChange}
+              onKeyDown={onNameKeyDown}
+              onBlur={() => {
+                // Clicking away without typing drops back to the nudge; keep an
+                // in-progress draft so a stray blur doesn't lose it.
+                if (!nameDraft.trim()) setNaming(false);
+              }}
+              maxLength={pet.NAME_MAX}
+              spellCheck={false}
+              placeholder="name me"
+              aria-label="Name the pet"
+              className="w-32 bg-transparent text-center text-base text-zinc-800 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-200 dark:caret-zinc-400"
+            />
+          </div>
+        ) : (
+          <>
         {/* Session transcript: everything said this page load. In-memory only,
             gone on reload. */}
         {showLog && turns > 0 && (
@@ -403,19 +442,21 @@ export default function CornerPet() {
             </button>
           )}
         </div>
+          </>
+        )}
       </div>
 
       {/* The pet: click to boop. */}
       <div
         role="button"
-        aria-label={`Boop ${name}`}
+        aria-label={name ? `Boop ${name}` : "Boop the pet"}
         onClick={boop}
         className="flex cursor-pointer flex-col items-center text-2xl leading-tight"
       >
         <div className={`h-5 whitespace-pre text-center text-sm ${face.bubble?.tone ?? ""}`}>
           {face.bubble?.text ?? ""}
         </div>
-        <div className="mb-0.5 text-base text-zinc-500">{name}</div>
+        {name && <div className="mb-0.5 text-base text-zinc-500">{name}</div>}
         {topper && <div className="leading-none">{topper}</div>}
         {breathe && <div className="h-1" aria-hidden />}
         <div className="whitespace-pre">{face.ears}</div>

@@ -35,6 +35,11 @@ export const CHAT_MAX = 280; // matches the /api/pet route's MAX_INPUT
 export const SPEECH_MIN_MS = 4000;
 export const SPEECH_MAX_MS = 14000;
 
+// naming
+export const NAME_MIN = 2;
+export const NAME_MAX = 16;
+export const NAME_ALLOWED = /[^\p{L}\p{N} _-]/gu; // strip anything but letters/digits/space/_-
+
 export const clamp = (v: number, lo: number, hi: number) =>
   Math.max(lo, Math.min(hi, v));
 
