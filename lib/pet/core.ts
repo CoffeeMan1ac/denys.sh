@@ -1,8 +1,8 @@
-// Brain + look for the on-page CornerPet. No React here, just logic. The
-// localStorage helpers merge rather than overwrite, so a partial save (e.g. just
-// lastSeen) never wipes the fields it leaves out.
+// Brain + look for the on-page pet: name, mood, face. No React here, just logic.
+// The localStorage helpers merge rather than overwrite, so a partial save (e.g.
+// just lastSeen) leaves the other fields intact.
 
-export const PET_KEY = "terminal:pet";
+export const PET_KEY = "terminal:pet"; // legacy key, kept so existing saves survive
 
 export type PetSave = {
   name?: string;
@@ -71,7 +71,7 @@ export const BOOP_REACTIONS = [
   { eyes: "( =w= )", tag: "~mrr" },
 ];
 
-// persistence (merge, so the two surfaces don't overwrite each other)
+// persistence (merge, so a partial save keeps the untouched fields)
 export function loadPet(): PetSave | null {
   try {
     const raw = window.localStorage.getItem(PET_KEY);
@@ -188,16 +188,14 @@ export const speechMs = (text: string) =>
   clamp(text.length * 90, SPEECH_MIN_MS, SPEECH_MAX_MS);
 
 // chat (talks to /api/pet)
-// Shared by both pets so the request contract lives in one place and can't drift.
 export const CHAT_WINDOW = 6; // how many recent messages we send as context
 export const CHAT_KEEP = 12; // how many we keep locally; only the last window is sent
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
-// Full conversation for the transcript panel either pet can open. Module state,
-// so it's in-memory only and resets on reload; intentionally not persisted, and
-// separate from the bounded window we send the model. Kept here so both pets
-// show the same running conversation.
+// Full conversation for the transcript panel. Module state, so it's in-memory
+// only and resets on reload; intentionally not persisted, and separate from the
+// bounded window we send the model.
 const sessionTranscript: ChatMsg[] = [];
 export const transcript = (): readonly ChatMsg[] => sessionTranscript;
 export const pushTranscript = (msg: ChatMsg) => sessionTranscript.push(msg);

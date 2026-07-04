@@ -40,7 +40,6 @@ export type LineResult = {
   cwd: string;
   prevCwd: string;
   clear: boolean;
-  launch?: string;
   exit?: boolean;
 };
 
@@ -55,7 +54,6 @@ const HELP: ReadonlyArray<[string, string]> = [
   ["cat", "print a file's contents"],
   ["tree", "list contents recursively"],
   ["history", "show command history"],
-  ["pet", "a little companion to boop"],
   ["exit", "close the terminal (resets the session)"],
 ];
 
@@ -134,7 +132,6 @@ export function runLine(line: string, state: ShellState): LineResult {
   let output: string[] = [];
   let status = 0;
   let clear = false;
-  let launch: string | undefined;
   let exit = false;
 
   // Split into segments on `&&`/`||`, executing left-to-right by exit status.
@@ -152,7 +149,6 @@ export function runLine(line: string, state: ShellState): LineResult {
         clear = true;
       }
       if (res.output.length) output.push(...res.output);
-      if (res.launch) launch = res.launch;
       if (res.exit) exit = true;
       if (res.cwd !== undefined && res.cwd !== cwd) {
         prevCwd = cwd;
@@ -172,7 +168,7 @@ export function runLine(line: string, state: ShellState): LineResult {
   }
   flush();
 
-  return { output, status, cwd, prevCwd, clear, launch, exit };
+  return { output, status, cwd, prevCwd, clear, exit };
 }
 
 // Execute one segment: a command plus optional `>`/`>>` redirection.
@@ -253,8 +249,6 @@ function execCommand(cmd: string, args: string[], state: ShellState): CommandRes
           (cmd, i) => `${String(i + 1).padStart(5)}  ${cmd}`,
         ),
       };
-    case "pet":
-      return { output: [], status: 0, launch: "pet" };
     case "exit":
       return { output: [], status: 0, exit: true };
     default:

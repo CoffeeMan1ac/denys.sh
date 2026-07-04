@@ -4,7 +4,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { displayPath } from "@/lib/terminal/filesystem";
 import { complete, commonPrefix } from "@/lib/terminal/complete";
 import { useTerminal } from "./TerminalProvider";
-import Pet from "./Pet";
 
 // The interactive terminal surface: scrollback + a live prompt line. It owns
 // only the in-progress input, history cursor, and Tab-completion cycle state;
@@ -25,21 +24,7 @@ function Prompt({ path }: { path: string }) {
 }
 
 export default function TerminalView() {
-  const {
-    lines,
-    history,
-    cwd,
-    activeProgram,
-    run,
-    cancel,
-    clearScreen,
-    exitProgram,
-    typeRequest,
-    requestType,
-    consumeType,
-    petNameIntent,
-    consumePetName,
-  } = useTerminal();
+  const { lines, history, cwd, run, cancel, clearScreen } = useTerminal();
   const [input, setInput] = useState("");
   // null = editing a fresh line; otherwise an index into `history`.
   const [historyIndex, setHistoryIndex] = useState<number | null>(null);
@@ -52,27 +37,6 @@ export default function TerminalView() {
     index: number;
     prefix: string;
   } | null>(null);
-  // Active auto-type animation (the corner pet typing out `pet`): the lead pause
-  // before it starts, and the per-character interval.
-  const typeTimerRef = useRef<number | null>(null);
-  const leadTimerRef = useRef<number | null>(null);
-
-  // Cancel an in-flight auto-type (lead or typing) so a real keystroke wins.
-  function stopTyping() {
-    let active = false;
-    if (leadTimerRef.current !== null) {
-      window.clearTimeout(leadTimerRef.current);
-      leadTimerRef.current = null;
-      active = true;
-    }
-    if (typeTimerRef.current !== null) {
-      window.clearInterval(typeTimerRef.current);
-      typeTimerRef.current = null;
-      active = true;
-    }
-    if (active) consumeType();
-  }
-
   // Keep the newest output in view.
   useEffect(() => {
     const el = scrollRef.current;
@@ -83,43 +47,6 @@ export default function TerminalView() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
-
-  // Auto-type a requested command (e.g. the corner pet's `pet`) into the prompt,
-  // one character at a time. Runs on mount too, so clicking the nudge (which
-  // opens the terminal and sets the request together) types as soon as this
-  // view appears.
-  useEffect(() => {
-    if (!typeRequest) return;
-    const { text, fast } = typeRequest;
-    setInput("");
-    setHistoryIndex(null);
-    inputRef.current?.focus(); // caret blinks at the prompt during the lead
-    let i = 0;
-    // Lead pause so the terminal is visibly open (and the eye has found the
-    // prompt) before anything types; otherwise a first-time visitor misses it.
-    // `fast` requests (a click already inside the terminal) barely pause and
-    // type quicker.
-    const lead = window.setTimeout(() => {
-      leadTimerRef.current = null;
-      typeTimerRef.current = window.setInterval(() => {
-        i += 1;
-        setInput(text.slice(0, i));
-        if (i >= text.length) {
-          if (typeTimerRef.current !== null) window.clearInterval(typeTimerRef.current);
-          typeTimerRef.current = null;
-          consumeType(); // mark done so reopening the terminal won't re-type
-        }
-      }, fast ? 55 : 140);
-    }, fast ? 120 : 650);
-    leadTimerRef.current = lead;
-    return () => {
-      window.clearTimeout(lead);
-      if (typeTimerRef.current !== null) {
-        window.clearInterval(typeTimerRef.current);
-        typeTimerRef.current = null;
-      }
-    };
-  }, [typeRequest, consumeType]);
 
   // Ctrl+Shift+C copies the selection, the terminal convention (plain Ctrl+C is
   // reserved for interrupt). Listens at the window so it works whether or not
@@ -151,7 +78,6 @@ export default function TerminalView() {
   }, [input, cwd]);
 
   function changeInput(value: string) {
-    stopTyping(); // a real edit takes over from the auto-type
     cycleRef.current = null; // typing breaks any active completion cycle
     setInput(value);
   }
@@ -187,7 +113,6 @@ export default function TerminalView() {
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    stopTyping(); // any keypress hands control back to the user
     if (e.key !== "Tab") cycleRef.current = null;
 
     // Ctrl-L clears the screen, Ctrl-C abandons the current line, like bash.
@@ -242,17 +167,6 @@ export default function TerminalView() {
     }
   }
 
-  // An interactive program (e.g. `pet`) takes over the surface like an
-  // alternate screen; quitting it returns to the prompt with scrollback intact.
-  if (activeProgram === "pet")
-    return (
-      <Pet
-        onExit={exitProgram}
-        autoName={petNameIntent}
-        onAutoNameConsumed={consumePetName}
-      />
-    );
-
   return (
     <div
       ref={scrollRef}
@@ -269,23 +183,6 @@ export default function TerminalView() {
             <div key={line.id} className="flex">
               <Prompt path={line.path} />
               <span className="whitespace-pre-wrap break-all">{line.text}</span>
-            </div>
-          );
-        }
-        if (line.type === "hint") {
-          // A welcome-style line; `pet` is clickable and types itself out (fast,
-          // since the eye is already on the terminal).
-          return (
-            <div key={line.id} className="whitespace-pre-wrap break-words">
-              Haven&apos;t named your companion yet? Run{" "}
-              <button
-                type="button"
-                onClick={() => requestType("pet", true)}
-                className="text-emerald-700 underline-offset-2 hover:underline dark:text-emerald-400"
-              >
-                pet
-              </button>{" "}
-              to do so.
             </div>
           );
         }
