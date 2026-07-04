@@ -52,6 +52,15 @@ html[data-theme="dark"] {
     box-shadow 300ms ease !important;
 }
 
+/* During the swap, drop live backdrop-filters: re-blurring the whole area
+   behind the mobile drawer/scrim every frame is what makes the fade stutter on
+   phones. The blur returning after 350ms is imperceptible behind a panel that's
+   already 70% opaque. */
+.theme-fade [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
 body {
   color: var(--foreground);
 }
