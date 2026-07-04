@@ -384,7 +384,7 @@ export default function CornerPet() {
               maxLength={pet.NAME_MAX}
               spellCheck={false}
               aria-label="Name the pet"
-              className="w-32 bg-transparent text-center text-base text-zinc-800 caret-zinc-600 outline-none dark:text-zinc-200 dark:caret-zinc-400"
+              className="w-40 bg-transparent text-center text-xl text-zinc-800 caret-zinc-600 outline-none dark:text-zinc-200 dark:caret-zinc-400"
             />
           </div>
         ) : (
