@@ -444,7 +444,7 @@ export default function CornerPet() {
             rows={1}
             spellCheck={false}
             aria-label={`Talk to ${name}`}
-            className="w-40 resize-none overflow-hidden bg-transparent text-center text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
+            className="w-40 resize-none overflow-hidden bg-transparent text-center text-2xl leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 hover:placeholder:text-zinc-600 dark:text-zinc-300 dark:caret-zinc-400 dark:hover:placeholder:text-zinc-400"
           />
           {turns > 0 && (
             <button
@@ -469,17 +469,17 @@ export default function CornerPet() {
         onClick={boop}
         className="flex cursor-pointer flex-col items-center text-3xl leading-tight"
       >
-        <div className={`h-5 whitespace-pre text-center text-sm ${face.bubble?.tone ?? ""}`}>
+        <div className={`h-6 whitespace-pre text-center text-base ${face.bubble?.tone ?? ""}`}>
           {face.bubble?.text ?? ""}
         </div>
-        {name && <div className="mb-0.5 text-base text-zinc-500">{name}</div>}
+        {name && <div className="mb-0.5 text-2xl text-zinc-500">{name}</div>}
         {topper && <div className="leading-none">{topper}</div>}
         {breathe && <div className="h-1" aria-hidden />}
         <div className="whitespace-pre">{face.ears}</div>
         {/* Tag sits to the left (inward) so it doesn't run off-screen. */}
         <div className="relative whitespace-pre">
           {face.tag && (
-            <span className={`absolute right-full top-0 mr-2 text-sm ${face.tag.tone}`}>
+            <span className={`absolute right-full top-0 mr-2 text-base ${face.tag.tone}`}>
               {face.tag.text}
             </span>
           )}
