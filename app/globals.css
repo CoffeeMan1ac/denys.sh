@@ -36,6 +36,22 @@ html[data-theme="dark"] {
   color-scheme: dark;
 }
 
+/* On while a theme change plays (ThemeToggle adds it for 350ms): every element
+   cross-fades its colors instead of snapping. !important so it briefly wins
+   over per-element transition utilities. */
+.theme-fade,
+.theme-fade *,
+.theme-fade *::before,
+.theme-fade *::after {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease,
+    border-color 300ms ease,
+    fill 300ms ease,
+    stroke 300ms ease,
+    box-shadow 300ms ease !important;
+}
+
 body {
   color: var(--foreground);
 }

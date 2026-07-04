@@ -6,6 +6,19 @@ import { Icon } from "@/app/components/Icon";
 // Sun/moon switch in the header nav. Stateless on purpose: which icon shows is
 // decided by CSS (dark:) off <html data-theme>, so the server markup never
 // disagrees with the theme the inline head script applied before hydration.
+
+// Colors cross-fade on a theme change: .theme-fade (globals.css) turns on
+// transitions everywhere just for the swap, then comes off so hover effects
+// and other animations run at their own pace again.
+let fadeTimer = 0;
+function applyTheme(next: "light" | "dark") {
+  const root = document.documentElement;
+  root.classList.add("theme-fade");
+  root.setAttribute("data-theme", next);
+  window.clearTimeout(fadeTimer);
+  fadeTimer = window.setTimeout(() => root.classList.remove("theme-fade"), 350);
+}
+
 export default function ThemeToggle() {
   // The head script senses the system theme at load; this follows OS theme
   // flips while the page is open, until the user has made an explicit choice.
@@ -15,10 +28,7 @@ export default function ThemeToggle() {
       try {
         if (localStorage.getItem("theme")) return;
       } catch {}
-      document.documentElement.setAttribute(
-        "data-theme",
-        e.matches ? "dark" : "light",
-      );
+      applyTheme(e.matches ? "dark" : "light");
     };
     mq.addEventListener("change", onChange);
     return () => mq.removeEventListener("change", onChange);
@@ -27,7 +37,7 @@ export default function ThemeToggle() {
   function toggle() {
     const root = document.documentElement;
     const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    root.setAttribute("data-theme", next);
+    applyTheme(next);
     try {
       localStorage.setItem("theme", next);
     } catch {}
