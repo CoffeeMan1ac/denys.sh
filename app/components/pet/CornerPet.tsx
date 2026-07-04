@@ -6,6 +6,12 @@ import { Icon } from "@/app/components/Icon";
 import { useKeyboardInset } from "@/app/components/useKeyboardInset";
 import * as pet from "@/lib/pet/core";
 
+// Launcher circle is h-14 (56px); DRAG_SLOP is how far a press travels before
+// it counts as a drag rather than a tap.
+const LAUNCHER = 56;
+const DRAG_SLOP = 5;
+const POS_KEY = "pet:pos"; // sessionStorage: dragged launcher spot for this session
+
 // The pet on the main page: name, mood, look, persisted to localStorage. It's
 // named in place (click the nudge) and doesn't appear until named. Hidden on the
 // /terminal route, a full terminal surface with no room for it. Below sm it
@@ -55,6 +61,9 @@ export default function CornerPet() {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetDragY, setSheetDragY] = useState(0); // grab handle: px dragged down
   const sheetDragRef = useRef<number | null>(null); // pointer's start Y
+  const [petPos, setPetPos] = useState<{ x: number; y: number } | null>(null); // dragged launcher spot, null = default corner
+  const petDragRef = useRef<{ x: number; y: number; baseX: number; baseY: number } | null>(null);
+  const petMovedRef = useRef(false); // gesture crossed the drag threshold; swallow its trailing click
   // Lifts the sheet above the on-screen keyboard where the browser overlays it.
   const keyboardInset = useKeyboardInset(isMobile && sheetOpen);
   const [, setTick] = useState(0);
@@ -117,6 +126,14 @@ export default function CornerPet() {
     return () => window.removeEventListener("pet:open", open);
   }, []);
 
+  // Remember the dragged launcher spot for the session.
+  useEffect(() => {
+    if (!petPos) return;
+    try {
+      sessionStorage.setItem(POS_KEY, JSON.stringify(petPos));
+    } catch {}
+  }, [petPos]);
+
   // Closing the sheet mid-naming drops back to the badged launcher.
   function closeSheet() {
     setSheetOpen(false);
@@ -162,6 +179,17 @@ export default function CornerPet() {
       missUntil.current = now + pet.MISSED_SHOW_MS;
       lastInteraction.current = now;
     }
+    // Restore the dragged launcher spot, clamped in case the viewport shrank.
+    try {
+      const raw = sessionStorage.getItem(POS_KEY);
+      const p = raw ? JSON.parse(raw) : null;
+      if (typeof p?.x === "number" && typeof p?.y === "number") {
+        setPetPos({
+          x: pet.clamp(p.x, 4, window.innerWidth - LAUNCHER - 4),
+          y: pet.clamp(p.y, 4, window.innerHeight - LAUNCHER - 4),
+        });
+      }
+    } catch {}
   }
   function saveNow() {
     const now = Date.now();
@@ -364,6 +392,42 @@ export default function CornerPet() {
     sheetDragRef.current = null;
     if (sheetDragY > 80) closeSheet();
     setSheetDragY(0);
+  }
+
+  // Draggable + tappable launcher. Pointer events drive the drag; the tap opens
+  // via a plain onClick so its target stays the button. Opening on pointerup
+  // instead lets the browser's follow-up click land on the just-mounted sheet
+  // overlay and close it. Capture the pointer only once a real drag starts (past
+  // DRAG_SLOP) so a tap's click is never suppressed.
+  function onPetDown(e: React.PointerEvent<HTMLButtonElement>) {
+    const r = e.currentTarget.getBoundingClientRect();
+    petDragRef.current = { x: e.clientX, y: e.clientY, baseX: r.left, baseY: r.top };
+    petMovedRef.current = false;
+  }
+  function onPetMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = petDragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!petMovedRef.current) {
+      if (Math.abs(dx) < DRAG_SLOP && Math.abs(dy) < DRAG_SLOP) return;
+      petMovedRef.current = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    setPetPos({
+      x: pet.clamp(d.baseX + dx, 4, window.innerWidth - LAUNCHER - 4),
+      y: pet.clamp(d.baseY + dy, 4, window.innerHeight - LAUNCHER - 4),
+    });
+  }
+  function onPetUp() {
+    petDragRef.current = null;
+  }
+  function onPetClick() {
+    if (petMovedRef.current) {
+      petMovedRef.current = false; // tail of a drag, not a real tap
+      return;
+    }
+    setSheetOpen(true);
   }
 
   // Hidden until hydrated, and on the full-screen terminal route.
@@ -635,12 +699,20 @@ export default function CornerPet() {
         {name && (
           <button
             type="button"
-            onClick={() => setSheetOpen(true)}
+            onPointerDown={onPetDown}
+            onPointerMove={onPetMove}
+            onPointerUp={onPetUp}
+            onPointerCancel={onPetUp}
+            onClick={onPetClick}
             aria-label={`Open ${name}`}
-            style={{ transform: `translateY(-${lift}px)` }}
-            className={`fixed bottom-4 right-4 z-40 grid h-14 w-14 place-items-center rounded-full border border-white/50 bg-white/40 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-opacity dark:border-white/10 dark:bg-zinc-900/40 ${
-              sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"
-            }`}
+            style={
+              petPos
+                ? { left: petPos.x, top: petPos.y }
+                : { transform: `translateY(-${lift}px)` }
+            }
+            className={`fixed z-40 grid h-14 w-14 cursor-grab touch-none place-items-center rounded-full border border-white/50 bg-white/40 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-opacity active:cursor-grabbing dark:border-white/10 dark:bg-zinc-900/40 ${
+              petPos ? "" : "bottom-4 right-4"
+            } ${sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"}`}
           >
             <Icon icon="mdi:paw" className="h-6 w-6 -rotate-[30deg]" aria-hidden />
           </button>
