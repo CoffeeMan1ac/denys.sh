@@ -459,7 +459,17 @@ export default function CornerPet() {
     <div className="flex flex-col items-center">
       <div className="h-7 whitespace-nowrap text-xl">
         {nameRemaining <= 0 ? (
-          <span className="text-emerald-600 dark:text-emerald-400">[Enter]</span>
+          <button
+            type="button"
+            // Commits before the input's blur handler can react to losing focus.
+            onPointerDown={(e) => {
+              e.preventDefault();
+              commitName();
+            }}
+            className="cursor-pointer text-emerald-600 dark:text-emerald-400"
+          >
+            {isMobile ? "[done]" : "[Enter]"}
+          </button>
         ) : (
           <span className="text-zinc-400">
             (min {nameRemaining} character{nameRemaining === 1 ? "" : "s"})
@@ -471,6 +481,7 @@ export default function CornerPet() {
         value={nameDraft}
         onChange={onNameChange}
         onKeyDown={onNameKeyDown}
+        enterKeyHint="done"
         onBlur={() => {
           // Clicking away without typing drops back to the nudge; keep an
           // in-progress draft so a stray blur doesn't lose it. In the sheet,
