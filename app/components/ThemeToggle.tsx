@@ -19,6 +19,15 @@ function applyTheme(next: "light" | "dark") {
   fadeTimer = window.setTimeout(() => root.classList.remove("theme-fade"), 350);
 }
 
+export function toggleTheme() {
+  const root = document.documentElement;
+  const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  applyTheme(next);
+  try {
+    localStorage.setItem("theme", next);
+  } catch {}
+}
+
 export default function ThemeToggle() {
   // The head script senses the system theme at load; this follows OS theme
   // flips while the page is open, until the user has made an explicit choice.
@@ -34,19 +43,10 @@ export default function ThemeToggle() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  function toggle() {
-    const root = document.documentElement;
-    const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    applyTheme(next);
-    try {
-      localStorage.setItem("theme", next);
-    } catch {}
-  }
-
   return (
     <button
       type="button"
-      onClick={toggle}
+      onClick={toggleTheme}
       aria-label="Toggle theme"
       title="Toggle theme"
       className="cursor-pointer self-center hover:text-black dark:hover:text-white"

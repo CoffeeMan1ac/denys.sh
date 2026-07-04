@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Icon } from "@/app/components/Icon";
 import TerminalTrigger from "./terminal/TerminalTrigger";
 import BrandPrompt from "./BrandPrompt";
-import ThemeToggle from "./ThemeToggle";
+import ThemeToggle, { toggleTheme } from "./ThemeToggle";
 
 const navLinks = [
   { href: "/showcase", label: "Showcase" },
@@ -124,11 +124,18 @@ export default function Header() {
               <TerminalTrigger variant="nav" />
             </span>
           </nav>
-          {/* Outside the closing nav so flipping the theme keeps the drawer open. */}
-          <div className="mt-auto flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 dark:border-zinc-800 dark:text-zinc-400">
+          {/* Whole row toggles the theme: a finger-friendly tap target. Outside
+              the closing nav so flipping the theme keeps the drawer open. */}
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label="Toggle theme"
+            className="mt-auto flex items-center justify-between border-t border-zinc-200 px-6 py-4 text-zinc-600 hover:text-black dark:border-zinc-800 dark:text-zinc-400 dark:hover:text-white"
+          >
             <span className="text-base">Theme</span>
-            <ThemeToggle />
-          </div>
+            <Icon icon="mdi:weather-night" className="h-6 w-6 dark:hidden" aria-hidden />
+            <Icon icon="mdi:weather-sunny" className="hidden h-6 w-6 dark:block" aria-hidden />
+          </button>
         </div>
       </div>
     </header>
