@@ -722,8 +722,10 @@ export default function CornerPet() {
           className={`fixed inset-0 z-50 ${sheetOpen ? "" : "pointer-events-none"}`}
           inert={!sheetOpen}
         >
+          {/* Own fixed layer, not absolute-in-fixed: iOS samples the viewport
+              directly so the blur covers the top band behind the toolbar. */}
           <div
-            className={`absolute inset-0 bg-zinc-900/20 backdrop-blur-sm transition-opacity duration-200 ease-out dark:bg-zinc-950/50 ${
+            className={`fixed inset-0 bg-zinc-900/20 backdrop-blur-sm transition-opacity duration-200 ease-out dark:bg-zinc-950/50 ${
               sheetOpen ? "opacity-100" : "opacity-0"
             }`}
             onClick={closeSheet}
@@ -755,11 +757,59 @@ export default function CornerPet() {
                 className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700"
               />
             </div>
+            {/* Naming only: a corner close, matching the nav drawer's. */}
+            {naming && (
+              <button
+                type="button"
+                onClick={closeSheet}
+                aria-label="Close"
+                className="absolute right-2 top-2 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+              >
+                <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
+              </button>
+            )}
             {naming ? (
-              <>
-                {namingBlock}
+              // First-run intro: say what the pet is (it talks), then name it.
+              <div className="flex w-full flex-col items-center gap-3 pb-2 text-center">
+                <h2 className="text-3xl font-semibold text-zinc-800 dark:text-zinc-200">
+                  Meet your pet
+                </h2>
+                <p className="max-w-[16rem] text-base leading-snug text-zinc-500 dark:text-zinc-400">
+                  It talks! Name to say hi.
+                </p>
                 <div className="shrink-0">{figure}</div>
-              </>
+                <input
+                  ref={nameInputRef}
+                  value={nameDraft}
+                  onChange={onNameChange}
+                  onKeyDown={onNameKeyDown}
+                  enterKeyHint="done"
+                  maxLength={pet.NAME_MAX}
+                  spellCheck={false}
+                  placeholder="type a name…"
+                  aria-label="Name the pet"
+                  className="w-full max-w-[15rem] rounded-xl border border-zinc-300 bg-transparent px-3 py-2.5 text-center text-xl text-zinc-800 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:border-zinc-700 dark:text-zinc-200 dark:caret-zinc-400"
+                />
+                <button
+                  type="button"
+                  // Commit before the input's blur can react to losing focus.
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    commitName();
+                  }}
+                  disabled={nameDraft.trim().length < pet.NAME_MIN}
+                  className="w-full max-w-[15rem] rounded-xl bg-zinc-800 py-3 text-xl font-bold text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
+                >
+                  Name it
+                </button>
+                <button
+                  type="button"
+                  onClick={closeSheet}
+                  className="mt-1 px-4 py-2 text-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                >
+                  Maybe later
+                </button>
+              </div>
             ) : (
               <>
                 {transcriptPanel}
