@@ -566,8 +566,8 @@ export default function CornerPet() {
   const transcriptPanel = (isMobile ? turns > 0 || liveRow : showLog && turns > 0) && (
     <div
       ref={logRef}
-      className={`overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left text-sm leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800 ${
-        isMobile ? "min-h-0 w-full" : "max-h-48 w-56"
+      className={`overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800 ${
+        isMobile ? "min-h-0 w-full text-base" : "max-h-48 w-56 text-sm"
       }`}
     >
       {pet.transcript().map((m, i) => (
@@ -621,15 +621,15 @@ export default function CornerPet() {
         rows={1}
         spellCheck={false}
         aria-label={`Talk to ${name}`}
-        className="max-h-32 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-base leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-300 dark:caret-zinc-400"
+        className="max-h-32 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-lg leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-300 dark:caret-zinc-400"
       />
       <button
         type="submit"
         disabled={!chatDraft.trim() || pending}
         aria-label={`Send to ${name}`}
-        className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-zinc-800 text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
+        className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-zinc-800 text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
       >
-        <Icon icon="mdi:send" className="h-4 w-4" aria-hidden />
+        <Icon icon="mdi:send" className="h-5 w-5" aria-hidden />
       </button>
     </form>
   ) : (
