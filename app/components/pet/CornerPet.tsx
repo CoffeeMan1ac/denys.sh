@@ -792,11 +792,10 @@ export default function CornerPet() {
                 />
                 <button
                   type="button"
-                  // Commit before the input's blur can react to losing focus.
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    commitName();
-                  }}
+                  // Commit on click, not pointerdown: committing mid-gesture swaps
+                  // in the talk view, and the trailing click then lands on the
+                  // exposed backdrop and closes the sheet.
+                  onClick={commitName}
                   disabled={nameDraft.trim().length < pet.NAME_MIN}
                   className="w-full max-w-[15rem] rounded-xl bg-zinc-800 py-2 text-2xl font-bold text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
                 >
