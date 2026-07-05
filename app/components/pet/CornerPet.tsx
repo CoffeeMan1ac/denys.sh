@@ -478,12 +478,15 @@ export default function CornerPet() {
   let phase = "awake";
   if (naming) phase = "awake"; // stay alert while being named, never dozing
   else if (pending) phase = "thinking";
-  else if (inputFocused) phase = "talking"; // attentive while the cursor is in the field
   else if (now < missUntil.current) phase = "missed";
   else if (now < overstimUntil.current) phase = "dizzy";
   else if (now < specialUntil.current) phase = "special";
   else if (now < boopUntil.current) phase = "booped";
   else if (now < startleUntil.current) phase = "startled";
+  // Below the reactions: with the keyboard up the field stays focused, so if
+  // "talking" sat above these a boop would register but never show, then all
+  // fire at once (overstim) on blur. Here it's just the attentive-idle state.
+  else if (inputFocused) phase = "talking";
   else if (since >= pet.ASLEEP_MS * scale) phase = "asleep";
   else if (since >= pet.SLEEPY_MS * scale) phase = "sleepy";
   else if (since >= pet.BORED_MS * scale) phase = "bored";
