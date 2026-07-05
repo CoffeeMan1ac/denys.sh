@@ -631,7 +631,17 @@ export default function CornerPet() {
         className="max-h-32 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-lg leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-300 dark:caret-zinc-400"
       />
       <button
-        type="submit"
+        type="button"
+        // Act on pointerdown with preventDefault so the button never steals
+        // focus from the textarea: the keyboard stays up and the field morphs
+        // from name to message without a blur/refocus flicker. Also suppresses
+        // the trailing ghost click. Disabled controls don't fire pointer events,
+        // so the disabled attr below is the guard.
+        onPointerDown={(e) => {
+          e.preventDefault();
+          if (naming) commitName();
+          else void sendMessage(chatDraft);
+        }}
         disabled={naming ? nameDraft.trim().length < pet.NAME_MIN : !chatDraft.trim() || pending}
         aria-label={naming ? "Name the pet" : `Send to ${name}`}
         className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-white transition duration-300 disabled:opacity-30 ${
@@ -689,7 +699,12 @@ export default function CornerPet() {
     <div
       role="button"
       aria-label={name ? `Boop ${name}` : "Boop the pet"}
-      onClick={boop}
+      // Boop on pointerdown with preventDefault so poking the pet never steals
+      // focus from the message field: the keyboard stays up.
+      onPointerDown={(e) => {
+        e.preventDefault();
+        boop();
+      }}
       // Always mono: the ASCII face relies on fixed-width glyphs to line up.
       className="flex cursor-pointer select-none flex-col items-center font-mono text-3xl leading-tight"
     >
