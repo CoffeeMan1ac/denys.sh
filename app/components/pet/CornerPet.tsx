@@ -770,11 +770,11 @@ export default function CornerPet() {
             )}
             {naming ? (
               // First-run intro: say what the pet is (it talks), then name it.
-              <div className="flex w-full flex-col items-center gap-3 pb-2 text-center">
+              <div className="flex w-full flex-col items-center gap-3 pb-0 text-center">
                 <h2 className="text-3xl font-semibold text-zinc-800 dark:text-zinc-200">
                   Meet your pet
                 </h2>
-                <p className="max-w-[16rem] text-base leading-snug text-zinc-500 dark:text-zinc-400">
+                <p className="-mt-2 max-w-[16rem] text-base leading-snug text-zinc-500 dark:text-zinc-400">
                   It talks! Name to say hi.
                 </p>
                 <div className="shrink-0">{figure}</div>
@@ -788,7 +788,7 @@ export default function CornerPet() {
                   spellCheck={false}
                   placeholder="type a name…"
                   aria-label="Name the pet"
-                  className="w-full max-w-[15rem] rounded-xl border border-zinc-300 bg-transparent px-3 py-2.5 text-center text-xl text-zinc-800 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:border-zinc-700 dark:text-zinc-200 dark:caret-zinc-400"
+                  className="w-full max-w-[15rem] rounded-xl border border-zinc-300 bg-transparent px-3 py-1.5 text-center text-xl text-zinc-800 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:border-zinc-700 dark:text-zinc-200 dark:caret-zinc-400"
                 />
                 <button
                   type="button"
@@ -798,14 +798,14 @@ export default function CornerPet() {
                     commitName();
                   }}
                   disabled={nameDraft.trim().length < pet.NAME_MIN}
-                  className="w-full max-w-[15rem] rounded-xl bg-zinc-800 py-3 text-xl font-bold text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
+                  className="w-full max-w-[15rem] rounded-xl bg-zinc-800 py-2 text-2xl font-bold text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
                 >
                   Name it
                 </button>
                 <button
                   type="button"
                   onClick={closeSheet}
-                  className="mt-1 px-4 py-2 text-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                  className="px-4 py-1 text-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
                 >
                   Maybe later
                 </button>
