@@ -36,19 +36,18 @@ html[data-theme="dark"] {
   color-scheme: dark;
 }
 
-/* On while a theme change plays (ThemeToggle adds it for 350ms): every element
-   cross-fades its colors instead of snapping. !important so it briefly wins
-   over per-element transition utilities. */
+/* On while a theme change plays (ThemeToggle adds it for 350ms): surfaces
+   cross-fade instead of snapping. Text (color/fill/stroke) is left to snap
+   instantly: high-contrast glyphs tweened through intermediate greys read as a
+   visible mid-transition flicker, so only the low-contrast surfaces fade.
+   !important so it briefly wins over per-element transition utilities. */
 .theme-fade,
 .theme-fade *,
 .theme-fade *::before,
 .theme-fade *::after {
   transition:
     background-color 300ms ease,
-    color 300ms ease,
     border-color 300ms ease,
-    fill 300ms ease,
-    stroke 300ms ease,
     box-shadow 300ms ease !important;
 }
 
