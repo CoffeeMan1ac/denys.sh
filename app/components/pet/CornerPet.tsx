@@ -771,7 +771,7 @@ export default function CornerPet() {
             {naming ? (
               // First-run intro: say what the pet is (it talks), then name it.
               <div className="flex w-full flex-col items-center gap-3 pb-0 text-center">
-                <h2 className="text-3xl font-semibold text-zinc-800 dark:text-zinc-200">
+                <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200">
                   Meet your pet
                 </h2>
                 <p className="-mt-2 max-w-[16rem] text-base leading-snug text-zinc-500 dark:text-zinc-400">
