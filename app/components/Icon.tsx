@@ -15,6 +15,7 @@ import accountOutline from "@iconify-icons/mdi/account-outline";
 import arrowExpand from "@iconify-icons/mdi/arrow-expand";
 import arrowTopRight from "@iconify-icons/mdi/arrow-top-right";
 import briefcaseOutline from "@iconify-icons/mdi/briefcase-outline";
+import check from "@iconify-icons/mdi/check";
 import close from "@iconify-icons/mdi/close";
 import consoleLine from "@iconify-icons/mdi/console-line";
 import fileDocumentOutline from "@iconify-icons/mdi/file-document-outline";
@@ -35,6 +36,7 @@ const registry = {
   "mdi:arrow-expand": arrowExpand,
   "mdi:arrow-top-right": arrowTopRight,
   "mdi:briefcase-outline": briefcaseOutline,
+  "mdi:check": check,
   "mdi:close": close,
   "mdi:console-line": consoleLine,
   "mdi:file-document-outline": fileDocumentOutline,

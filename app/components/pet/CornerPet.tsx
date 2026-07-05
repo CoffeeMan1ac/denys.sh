@@ -330,7 +330,7 @@ export default function CornerPet() {
   }
 
   // naming
-  function onNameChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function onNameChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setNameDraft(e.target.value.replace(pet.NAME_ALLOWED, "").slice(0, pet.NAME_MAX));
   }
   function commitName() {
@@ -345,7 +345,7 @@ export default function CornerPet() {
     lastInteraction.current = now;
     registerBoop(now); // a happy little reaction on naming
   }
-  function onNameKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+  function onNameKeyDown(e: React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
     if (e.key === "Escape") {
       e.preventDefault();
       setNaming(false);
@@ -356,10 +356,12 @@ export default function CornerPet() {
     }
   }
 
-  // Focus the name field the moment it opens.
+  // Focus the name field the moment it opens. On phones that's the shared
+  // composer textarea; on desktop the dedicated input.
   useEffect(() => {
-    if (naming) nameInputRef.current?.focus();
-  }, [naming]);
+    if (!naming) return;
+    (isMobile ? chatRef : nameInputRef).current?.focus();
+  }, [naming, isMobile]);
 
   // Auto-size the talk field to its content: long messages wrap and grow the box
   // upward (it's anchored above the pet).
@@ -602,34 +604,54 @@ export default function CornerPet() {
   // a toggle to its right (out of flow, so the field stays centered over the
   // pet) to reveal the conversation.
   const talkRow = isMobile ? (
+    // One composer for both phases: naming (green check, commits the name) and
+    // talking (send). The element stays mounted across the switch so the field
+    // morphs in place instead of remounting.
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        void sendMessage(chatDraft);
+        if (naming) commitName();
+        else void sendMessage(chatDraft);
       }}
       className="flex w-full items-end gap-2 rounded-3xl bg-zinc-100 py-2 pl-4 pr-2 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
     >
       <textarea
         ref={chatRef}
-        value={chatDraft}
-        onChange={(e) => setChatDraft(e.target.value)}
-        onKeyDown={onChatKeyDown}
+        value={naming ? nameDraft : chatDraft}
+        onChange={naming ? onNameChange : (e) => setChatDraft(e.target.value)}
+        onKeyDown={naming ? onNameKeyDown : onChatKeyDown}
         onFocus={() => setInputFocused(true)}
         onBlur={() => setInputFocused(false)}
-        maxLength={pet.CHAT_MAX}
-        placeholder={`message ${name}`}
+        maxLength={naming ? pet.NAME_MAX : pet.CHAT_MAX}
+        placeholder={naming ? "type a name…" : `message ${name}`}
         rows={1}
         spellCheck={false}
-        aria-label={`Talk to ${name}`}
+        enterKeyHint={naming ? "done" : "send"}
+        aria-label={naming ? "Name the pet" : `Talk to ${name}`}
         className="max-h-32 min-w-0 flex-1 resize-none overflow-y-auto bg-transparent py-1 text-lg leading-snug text-zinc-700 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:text-zinc-300 dark:caret-zinc-400"
       />
       <button
         type="submit"
-        disabled={!chatDraft.trim() || pending}
-        aria-label={`Send to ${name}`}
-        className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-zinc-800 text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
+        disabled={naming ? nameDraft.trim().length < pet.NAME_MIN : !chatDraft.trim() || pending}
+        aria-label={naming ? "Name the pet" : `Send to ${name}`}
+        className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-white transition duration-300 disabled:opacity-30 ${
+          naming ? "bg-emerald-600 dark:bg-emerald-500" : "bg-zinc-800 dark:bg-zinc-200 dark:text-zinc-900"
+        }`}
       >
-        <Icon icon="mdi:send" className="h-5 w-5" aria-hidden />
+        {/* Both icons stacked; cross-fade so check → send dissolves in step with
+            the color, instead of a hard swap (SVG paths can't tween). */}
+        <span className="relative grid h-5 w-5 place-items-center">
+          <Icon
+            icon="mdi:check"
+            className={`absolute h-5 w-5 transition-opacity duration-300 ${naming ? "opacity-100" : "opacity-0"}`}
+            aria-hidden
+          />
+          <Icon
+            icon="mdi:send"
+            className={`absolute h-5 w-5 transition-opacity duration-300 ${naming ? "opacity-0" : "opacity-100"}`}
+            aria-hidden
+          />
+        </span>
       </button>
     </form>
   ) : (
@@ -668,7 +690,8 @@ export default function CornerPet() {
       role="button"
       aria-label={name ? `Boop ${name}` : "Boop the pet"}
       onClick={boop}
-      className="flex cursor-pointer select-none flex-col items-center text-3xl leading-tight"
+      // Always mono: the ASCII face relies on fixed-width glyphs to line up.
+      className="flex cursor-pointer select-none flex-col items-center font-mono text-3xl leading-tight"
     >
       <div className={`h-6 whitespace-pre text-center text-base ${face.bubble?.tone ?? ""}`}>
         {face.bubble?.text ?? ""}
@@ -740,7 +763,7 @@ export default function CornerPet() {
                   }
                 : undefined),
             }}
-            className={`absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col items-center gap-2 rounded-t-2xl border-t border-zinc-200 bg-white px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-1.5 font-mono text-zinc-700 shadow-2xl ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
+            className={`absolute inset-x-0 bottom-0 flex max-h-[85dvh] flex-col items-center gap-2 rounded-t-2xl border-t border-zinc-200 bg-white px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-1.5 font-sans text-zinc-700 shadow-2xl ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
               sheetDragY ? "" : "transition-transform duration-200"
             } ${sheetOpen ? "translate-y-0" : "translate-y-full"}`}
           >
@@ -768,54 +791,23 @@ export default function CornerPet() {
                 <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
               </button>
             )}
+            {/* Above the composer: the first-run intro while naming, the
+                transcript once named. Figure and composer below stay mounted so
+                the name field morphs straight into the message field. */}
             {naming ? (
-              // First-run intro: say what the pet is (it talks), then name it.
-              <div className="flex w-full flex-col items-center gap-3 pb-0 text-center">
+              <div className="flex w-full flex-col items-center gap-2 text-center">
                 <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200">
-                  Meet your pet
+                  Name your pet
                 </h2>
-                <p className="-mt-2 max-w-[16rem] text-base leading-snug text-zinc-500 dark:text-zinc-400">
+                <p className="-mt-1 max-w-[16rem] text-lg leading-snug text-zinc-500 dark:text-zinc-400">
                   It talks! Name to say hi.
                 </p>
-                <div className="shrink-0">{figure}</div>
-                <input
-                  ref={nameInputRef}
-                  value={nameDraft}
-                  onChange={onNameChange}
-                  onKeyDown={onNameKeyDown}
-                  enterKeyHint="done"
-                  maxLength={pet.NAME_MAX}
-                  spellCheck={false}
-                  placeholder="type a name…"
-                  aria-label="Name the pet"
-                  className="w-full max-w-[15rem] rounded-xl border border-zinc-300 bg-transparent px-3 py-1.5 text-center text-xl text-zinc-800 caret-zinc-600 outline-none placeholder:text-zinc-400 dark:border-zinc-700 dark:text-zinc-200 dark:caret-zinc-400"
-                />
-                <button
-                  type="button"
-                  // Commit on click, not pointerdown: committing mid-gesture swaps
-                  // in the talk view, and the trailing click then lands on the
-                  // exposed backdrop and closes the sheet.
-                  onClick={commitName}
-                  disabled={nameDraft.trim().length < pet.NAME_MIN}
-                  className="w-full max-w-[15rem] rounded-xl bg-zinc-800 py-2 text-2xl font-bold text-white transition-opacity disabled:opacity-30 dark:bg-zinc-200 dark:text-zinc-900"
-                >
-                  Name it
-                </button>
-                <button
-                  type="button"
-                  onClick={closeSheet}
-                  className="px-4 py-1 text-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-                >
-                  Maybe later
-                </button>
               </div>
             ) : (
-              <>
-                {transcriptPanel}
-                <div className="shrink-0">{figure}</div>
-                <div className="w-full shrink-0">{talkRow}</div>
-              </>
+              transcriptPanel
             )}
+            <div className="shrink-0">{figure}</div>
+            <div className="w-full shrink-0">{talkRow}</div>
           </div>
         </div>
       </>
