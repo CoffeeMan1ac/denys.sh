@@ -16,7 +16,7 @@ function applyTheme(next: "light" | "dark") {
   root.classList.add("theme-fade");
   root.setAttribute("data-theme", next);
   window.clearTimeout(fadeTimer);
-  fadeTimer = window.setTimeout(() => root.classList.remove("theme-fade"), 350);
+  fadeTimer = window.setTimeout(() => root.classList.remove("theme-fade"), 220);
 }
 
 export function toggleTheme() {

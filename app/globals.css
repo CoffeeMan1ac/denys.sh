@@ -36,19 +36,23 @@ html[data-theme="dark"] {
   color-scheme: dark;
 }
 
-/* On while a theme change plays (ThemeToggle adds it for 350ms): surfaces
-   cross-fade instead of snapping. Text (color/fill/stroke) is left to snap
-   instantly: high-contrast glyphs tweened through intermediate greys read as a
-   visible mid-transition flicker, so only the low-contrast surfaces fade.
-   !important so it briefly wins over per-element transition utilities. */
+/* On while a theme change plays (ThemeToggle adds it for the same duration):
+   text and surfaces cross-fade together. They must stay in phase: snapping text
+   while surfaces fade leaves light text briefly on a still-light background (it
+   washes out until the surface catches up), and a long fade lets the grey
+   midpoint dwell. 180ms keeps both from registering. !important so it briefly
+   wins over per-element transition utilities. */
 .theme-fade,
 .theme-fade *,
 .theme-fade *::before,
 .theme-fade *::after {
   transition:
-    background-color 300ms ease,
-    border-color 300ms ease,
-    box-shadow 300ms ease !important;
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    fill 180ms ease,
+    stroke 180ms ease,
+    box-shadow 180ms ease !important;
 }
 
 /* During the swap, drop live backdrop-filters: re-blurring the whole area
