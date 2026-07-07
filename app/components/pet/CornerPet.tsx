@@ -451,8 +451,12 @@ export default function CornerPet() {
   // (translateX so its own width doesn't shift it). A single bright character
   // crawls left to right, snake-style. Phones have no nudge here; naming is
   // reached from the nav drawer's Pet entry.
-  if (!name && !naming) {
-    if (isMobile || docked) return null;
+  if (!name && !naming && isMobile) return null;
+
+  // Docked and unnamed falls through to the docked branch, so its side panel
+  // stays mounted (closed) and slides open when naming starts, matching the
+  // always-mounted links drawer instead of popping in already-open.
+  if (!name && !naming && !docked) {
     const lead = "psst — name me! ";
     const tail = "(click!)";
     const snake = Math.floor(Date.now() / 110) % (lead.length + tail.length);
