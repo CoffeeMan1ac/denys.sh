@@ -465,6 +465,9 @@ export default function CornerPet() {
   // the edge; a tap toggles. Opening from the paw is standalone, so it clears
   // underMenu and brings its own scrim.
   function openFromPaw() {
+    // Close the burger drawer if it's open, else its scrim stacks with this
+    // panel's own -> double darkening.
+    window.dispatchEvent(new Event("pet:close-menu"));
     underMenuRef.current = false;
     setUnderMenu(false);
     setSheetOpen(true);
@@ -977,12 +980,32 @@ export default function CornerPet() {
             onPointerCancel={onPawUp}
             onClick={onPawClick}
             aria-label={sheetOpen ? `Close ${name}` : `Open ${name}`}
-            style={{ top: pawY ?? "50%", translate: `${panelTx - PANEL_W}px -50%` }}
-            className={`pointer-events-auto absolute right-0 z-10 grid h-16 w-8 cursor-grab touch-none place-items-center rounded-l-full border border-r-0 border-zinc-200 bg-white pl-1 text-zinc-500 shadow-lg active:cursor-grabbing dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 ${
+            // +6 slips the tab 6px over the panel edge (the viewBox's 28..34
+            // strip) so its fill hides the panel's straight border there.
+            style={{ top: pawY ?? "50%", translate: `${panelTx - PANEL_W + 6}px -50%` }}
+            className={`pointer-events-auto absolute right-0 z-10 block h-[84px] w-[34px] cursor-grab touch-none [filter:drop-shadow(0_1px_2px_rgb(0_0_0/0.15))] active:cursor-grabbing ${
               dragging ? "" : "transition-transform duration-200 ease-out"
             }`}
           >
-            <Icon icon="mdi:paw" className="h-6 w-6 -rotate-[30deg]" aria-hidden />
+            {/* Tab that flares into the panel with concave tails. The stroke is
+                the panel's border routed around the bump (its vertical ends meet
+                the panel's border-l); the fill slips over the edge (x 28..34) to
+                cover the straight border underneath. Tune the two curves freely. */}
+            <svg viewBox="0 0 34 84" className="absolute inset-0 h-full w-full" aria-hidden>
+              <path
+                d="M34 0 L28 0 C28 28 0 14 0 42 C0 70 28 56 28 84 L34 84 Z"
+                className="fill-white dark:fill-zinc-950"
+              />
+              <path
+                d="M28 0 C28 28 0 14 0 42 C0 70 28 56 28 84"
+                fill="none"
+                strokeWidth={1}
+                className="stroke-zinc-200 dark:stroke-zinc-800"
+              />
+            </svg>
+            <span className="absolute inset-y-0 left-0 grid w-7 place-items-center text-zinc-500 dark:text-zinc-400">
+              <Icon icon="mdi:paw" className="h-6 w-6 -rotate-[30deg]" aria-hidden />
+            </span>
           </button>
         )}
       </div>
