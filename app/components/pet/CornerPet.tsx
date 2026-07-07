@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Icon } from "@/app/components/Icon";
 import { useKeyboardInset } from "@/app/components/useKeyboardInset";
 import * as pet from "@/lib/pet/core";
+import { PET_GUTTER_CENTER, usePetDocked } from "@/lib/pet/dock";
 
 // Launcher circle is h-14 (56px); DRAG_SLOP is how far a press travels before
 // it counts as a drag rather than a tap.
@@ -58,7 +59,12 @@ export default function CornerPet() {
   const [speech, setSpeech] = useState<{ text: string; until: number } | null>(null);
   const [lift, setLift] = useState(0); // px to lift so we don't overlap the footer
   const [isMobile, setIsMobile] = useState(false); // below sm: launcher button + sheet
+  const docked = usePetDocked(); // gutter too thin: pet rides the nav, not the corner
   const [sheetOpen, setSheetOpen] = useState(false);
+  // Opened over the 640-950 burger drawer: that drawer stays up as the single
+  // scrim, so this panel skips its own dimming. Ref mirror for event handlers.
+  const [underMenu, setUnderMenu] = useState(false);
+  const underMenuRef = useRef(false);
   const [sheetDragY, setSheetDragY] = useState(0); // grab handle: px dragged down
   const sheetDragRef = useRef<number | null>(null); // pointer's start Y
   const [petPos, setPetPos] = useState<{ x: number; y: number } | null>(null); // dragged launcher spot, null = default corner
@@ -116,9 +122,13 @@ export default function CornerPet() {
     return () => mq.removeEventListener("change", sync);
   }, []);
 
-  // The nav drawer's Pet entry opens the pet, jumping into naming when unnamed.
+  // The nav's Pet entry opens the pet, jumping into naming when unnamed. The
+  // event says whether it opened over the burger drawer (640-950).
   useEffect(() => {
-    const open = () => {
+    const open = (e: Event) => {
+      const um = (e as CustomEvent<{ underMenu?: boolean }>).detail?.underMenu ?? false;
+      setUnderMenu(um);
+      underMenuRef.current = um;
       setSheetOpen(true);
       if (!nameRef.current) setNaming(true);
     };
@@ -137,6 +147,13 @@ export default function CornerPet() {
   // Closing the sheet mid-naming drops back to the badged launcher.
   function closeSheet() {
     setSheetOpen(false);
+    // Opened over the drawer: close it too so its shared scrim leaves and both
+    // panels slide out together (the pet covers the drawer on the way out).
+    if (underMenuRef.current) {
+      window.dispatchEvent(new Event("pet:close-menu"));
+      setUnderMenu(false);
+      underMenuRef.current = false;
+    }
     if (!nameRef.current) {
       setNaming(false);
       setNameDraft("");
@@ -147,13 +164,7 @@ export default function CornerPet() {
   useEffect(() => {
     if (!sheetOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setSheetOpen(false);
-        if (!nameRef.current) {
-          setNaming(false);
-          setNameDraft("");
-        }
-      }
+      if (e.key === "Escape") closeSheet();
     };
     window.addEventListener("keydown", onKey);
     const previous = document.body.style.overflow;
@@ -356,12 +367,12 @@ export default function CornerPet() {
     }
   }
 
-  // Focus the name field the moment it opens. On phones that's the shared
-  // composer textarea; on desktop the dedicated input.
+  // Focus the name field the moment it opens. In a sheet/side panel (docked)
+  // that's the shared composer textarea; on the wide desktop the dedicated input.
   useEffect(() => {
     if (!naming) return;
-    (isMobile ? chatRef : nameInputRef).current?.focus();
-  }, [naming, isMobile]);
+    (docked ? chatRef : nameInputRef).current?.focus();
+  }, [naming, docked]);
 
   // Auto-size the talk field to its content: long messages wrap and grow the box
   // upward (it's anchored above the pet).
@@ -441,7 +452,7 @@ export default function CornerPet() {
   // crawls left to right, snake-style. Phones have no nudge here; naming is
   // reached from the nav drawer's Pet entry.
   if (!name && !naming) {
-    if (isMobile) return null;
+    if (isMobile || docked) return null;
     const lead = "psst — name me! ";
     const tail = "(click!)";
     const snake = Math.floor(Date.now() / 110) % (lead.length + tail.length);
@@ -450,8 +461,8 @@ export default function CornerPet() {
       <button
         type="button"
         onClick={() => setNaming(true)}
-        style={{ transform: `translateX(50%) translateY(-${lift}px)` }}
-        className="fixed bottom-4 right-52 z-40 cursor-pointer whitespace-nowrap text-2xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
+        style={{ left: PET_GUTTER_CENTER, transform: `translate(-50%, -${lift}px)` }}
+        className="fixed bottom-4 z-40 cursor-pointer whitespace-nowrap text-2xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
       >
         {[...lead].map((ch, i) => (
           <span key={i} className={i === snake ? glow : undefined}>
@@ -561,18 +572,18 @@ export default function CornerPet() {
   // (it only becomes a real entry once the reply finishes), so the sheet needs
   // no reply bubble.
   const liveRow =
-    isMobile &&
+    docked &&
     (pending || (!!speech && now < speech.until)) &&
     pet.transcript().at(-1)?.role === "user";
 
   // Session transcript: everything said this page load. In-memory only, gone on
   // reload. Behind the arrow toggle on desktop; always visible in the sheet,
   // where it grows with the conversation and scrolls once the sheet is full.
-  const transcriptPanel = (isMobile ? turns > 0 || liveRow : showLog && turns > 0) && (
+  const transcriptPanel = (docked ? turns > 0 || liveRow : showLog && turns > 0) && (
     <div
       ref={logRef}
       className={`overflow-y-auto rounded-2xl bg-white/95 px-3 py-2 text-left leading-snug shadow-sm ring-1 ring-zinc-200 dark:bg-zinc-900/95 dark:ring-zinc-800 ${
-        isMobile ? "min-h-0 w-full text-base" : "max-h-48 w-56 text-sm"
+        docked ? "min-h-0 w-full text-base" : "max-h-48 w-56 text-sm"
       }`}
     >
       {pet.transcript().map((m, i) => (
@@ -606,7 +617,7 @@ export default function CornerPet() {
   // field and a send button. On desktop it stays the bare centered field, with
   // a toggle to its right (out of flow, so the field stays centered over the
   // pet) to reveal the conversation.
-  const talkRow = isMobile ? (
+  const talkRow = docked ? (
     // One composer for both phases: naming (green check, commits the name) and
     // talking (send). The element stays mounted across the switch so the field
     // morphs in place instead of remounting.
@@ -731,6 +742,29 @@ export default function CornerPet() {
     </div>
   );
 
+  // Shared body for both the phone bottom sheet and the docked side panel: the
+  // first-run intro while naming, else the transcript, then the pet and the
+  // composer (kept mounted so the name field morphs straight into the message
+  // field). Each surface wraps this with its own frame and close affordance.
+  const sheetInner = (
+    <>
+      {naming ? (
+        <div className="flex w-full flex-col items-center gap-2 text-center">
+          <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200">
+            Name your pet
+          </h2>
+          <p className="-mt-1 max-w-[16rem] text-lg leading-snug text-zinc-500 dark:text-zinc-400">
+            It talks! Name to say hi.
+          </p>
+        </div>
+      ) : (
+        transcriptPanel
+      )}
+      <div className="shrink-0">{figure}</div>
+      <div className="w-full shrink-0">{talkRow}</div>
+    </>
+  );
+
   // Phones: a paw launcher, only once named (unnamed pets are reached from the
   // nav drawer). The full pet opens in a bottom sheet so it never sits over the
   // page content.
@@ -809,23 +843,62 @@ export default function CornerPet() {
                 <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
               </button>
             )}
-            {/* Above the composer: the first-run intro while naming, the
-                transcript once named. Figure and composer below stay mounted so
-                the name field morphs straight into the message field. */}
-            {naming ? (
-              <div className="flex w-full flex-col items-center gap-2 text-center">
-                <h2 className="text-3xl font-bold text-zinc-800 dark:text-zinc-200">
-                  Name your pet
-                </h2>
-                <p className="-mt-1 max-w-[16rem] text-lg leading-snug text-zinc-500 dark:text-zinc-400">
-                  It talks! Name to say hi.
-                </p>
-              </div>
-            ) : (
-              transcriptPanel
-            )}
-            <div className="shrink-0">{figure}</div>
-            <div className="w-full shrink-0">{talkRow}</div>
+            {sheetInner}
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Docked (laptop, thin gutter): the pet leaves the corner. A paw half-circle
+  // tab on the right edge and the nav's Pet entry both open it in a right-side
+  // panel that reuses the phone sheet's body.
+  if (docked) {
+    return (
+      <>
+        {name && (
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            aria-label={`Open ${name}`}
+            className={`fixed right-0 top-1/2 z-40 grid h-16 w-8 -translate-y-1/2 cursor-pointer place-items-center rounded-l-full border border-r-0 border-white/50 bg-white/40 pl-1 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-opacity dark:border-white/10 dark:bg-zinc-900/40 ${
+              sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"
+            }`}
+          >
+            <Icon icon="mdi:paw" className="h-6 w-6 -rotate-[30deg]" aria-hidden />
+          </button>
+        )}
+        {/* Panel, always mounted so it can slide; inert while closed. */}
+        <div
+          className={`fixed inset-0 z-50 ${sheetOpen ? "" : "pointer-events-none"}`}
+          inert={!sheetOpen}
+        >
+          {/* Under the burger drawer this is a bare click-catcher; the drawer's
+              own scrim does the dimming. Standalone (above 950) it's the scrim. */}
+          <div
+            onClick={closeSheet}
+            className={`fixed inset-0 transition-opacity duration-200 ease-out ${
+              sheetOpen ? "opacity-100" : "opacity-0"
+            } ${underMenu ? "" : "bg-zinc-900/20 backdrop-blur-sm dark:bg-zinc-950/50"}`}
+          />
+          <div
+            className={`absolute inset-y-0 right-0 flex w-80 max-w-[90vw] flex-col overflow-y-auto border-l border-zinc-200 bg-white px-4 font-sans text-zinc-700 shadow-2xl transition-transform duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
+              sheetOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <button
+              type="button"
+              onClick={closeSheet}
+              aria-label="Close"
+              className="absolute right-2 top-2 z-10 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            >
+              <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
+            </button>
+            {/* Pet + composer sit at the bottom; the transcript grows above and
+                scrolls once it fills. */}
+            <div className="mt-auto flex w-full flex-col items-center gap-2 pb-6 pt-14">
+              {sheetInner}
+            </div>
           </div>
         </div>
       </>
@@ -835,8 +908,8 @@ export default function CornerPet() {
   return (
     <div
       ref={cardRef}
-      style={{ transform: `translateY(-${lift}px)` }}
-      className="fixed bottom-4 right-32 z-40 flex select-none flex-col items-center font-mono text-zinc-700 dark:text-zinc-300"
+      style={{ left: PET_GUTTER_CENTER, transform: `translate(-50%, -${lift}px)` }}
+      className="fixed bottom-4 z-40 flex select-none flex-col items-center font-mono text-zinc-700 dark:text-zinc-300"
     >
       {/* On top of the pet: the chat input while talking, otherwise the bubble. */}
       <div className="relative flex flex-col items-center">
