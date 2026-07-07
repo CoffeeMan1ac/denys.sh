@@ -149,10 +149,11 @@ export default function CornerPet() {
     setSheetOpen(false);
     // Opened over the drawer: close it too so its shared scrim leaves and both
     // panels slide out together (the pet covers the drawer on the way out).
+    // Don't clear underMenu here: flipping it back mid-fade would re-add this
+    // panel's own dimming just as it fades, doubling the darkening. The next
+    // open sets it fresh.
     if (underMenuRef.current) {
       window.dispatchEvent(new Event("pet:close-menu"));
-      setUnderMenu(false);
-      underMenuRef.current = false;
     }
     if (!nameRef.current) {
       setNaming(false);
