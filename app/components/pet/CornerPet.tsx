@@ -12,6 +12,9 @@ import { PET_GUTTER_CENTER, usePetDocked } from "@/lib/pet/dock";
 const LAUNCHER = 56;
 const DRAG_SLOP = 5;
 const POS_KEY = "pet:pos"; // sessionStorage: dragged launcher spot for this session
+// Docked side panel width (w-80). Docked only runs >=640px, where max-w-[90vw]
+// never clamps it, so this is exact and safe to drive the drag math.
+const PANEL_W = 320;
 
 // The pet on the main page: name, mood, look, persisted to localStorage. It's
 // named in place (click the nudge) and doesn't appear until named. Hidden on the
@@ -70,6 +73,19 @@ export default function CornerPet() {
   const [petPos, setPetPos] = useState<{ x: number; y: number } | null>(null); // dragged launcher spot, null = default corner
   const petDragRef = useRef<{ x: number; y: number; baseX: number; baseY: number } | null>(null);
   const petMovedRef = useRef(false); // gesture crossed the drag threshold; swallow its trailing click
+  // Docked paw handle: drag up/down to reposition it along the edge, or
+  // left/right to pull the panel out/in. pawY is its vertical center (null =
+  // middle); dragX is the panel's live translateX while pulling (null = settled).
+  const [pawY, setPawY] = useState<number | null>(null);
+  const [dragX, setDragX] = useState<number | null>(null);
+  const pawDragRef = useRef<{
+    x: number;
+    y: number;
+    axis: null | "x" | "y";
+    startY: number;
+    startT: number;
+  } | null>(null);
+  const pawMovedRef = useRef(false);
   // Lifts the sheet above the on-screen keyboard where the browser overlays it.
   const keyboardInset = useKeyboardInset(isMobile && sheetOpen);
   const [, setTick] = useState(0);
@@ -442,6 +458,58 @@ export default function CornerPet() {
       return;
     }
     setSheetOpen(true);
+  }
+
+  // The docked paw both opens the panel and is its drag handle. Horizontal drags
+  // pull the panel out (or push it back); vertical drags slide the handle along
+  // the edge; a tap toggles. Opening from the paw is standalone, so it clears
+  // underMenu and brings its own scrim.
+  function openFromPaw() {
+    underMenuRef.current = false;
+    setUnderMenu(false);
+    setSheetOpen(true);
+  }
+  function onPawDown(e: React.PointerEvent<HTMLButtonElement>) {
+    pawDragRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      axis: null,
+      startY: pawY ?? window.innerHeight / 2,
+      startT: sheetOpen ? 0 : PANEL_W,
+    };
+    pawMovedRef.current = false;
+  }
+  function onPawMove(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = pawDragRef.current;
+    if (!d) return;
+    const dx = e.clientX - d.x;
+    const dy = e.clientY - d.y;
+    if (!d.axis) {
+      if (Math.abs(dx) < DRAG_SLOP && Math.abs(dy) < DRAG_SLOP) return;
+      d.axis = Math.abs(dx) >= Math.abs(dy) ? "x" : "y";
+      pawMovedRef.current = true;
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+    if (d.axis === "x") setDragX(pet.clamp(d.startT + dx, 0, PANEL_W));
+    else setPawY(pet.clamp(d.startY + dy, 40, window.innerHeight - 40));
+  }
+  function onPawUp(e: React.PointerEvent<HTMLButtonElement>) {
+    const d = pawDragRef.current;
+    pawDragRef.current = null;
+    if (d?.axis === "x") {
+      const t = pet.clamp(d.startT + (e.clientX - d.x), 0, PANEL_W);
+      setDragX(null);
+      if (t < PANEL_W / 2) openFromPaw();
+      else closeSheet();
+    }
+  }
+  function onPawClick() {
+    if (pawMovedRef.current) {
+      pawMovedRef.current = false; // tail of a drag, not a tap
+      return;
+    }
+    if (sheetOpen) closeSheet();
+    else openFromPaw();
   }
 
   // Hidden until hydrated, and on the full-screen terminal route.
@@ -855,58 +923,69 @@ export default function CornerPet() {
     );
   }
 
-  // Docked (laptop, thin gutter): the pet leaves the corner. A paw half-circle
-  // tab on the right edge and the nav's Pet entry both open it in a right-side
-  // panel that reuses the phone sheet's body.
+  // Docked (laptop, thin gutter): the pet leaves the corner for a right-side
+  // panel that reuses the phone sheet's body. A paw handle on the panel's left
+  // edge opens it (tap or pull) and rides along the edge; the nav's Pet entry
+  // opens it too. panelTx is how far off-screen the panel sits (0 = out, PANEL_W
+  // = tucked away); the paw and scrim track it.
   if (docked) {
+    const panelTx = dragX !== null ? dragX : sheetOpen ? 0 : PANEL_W;
+    const dragging = dragX !== null;
+    const scrimOpacity = dragging ? (PANEL_W - panelTx) / PANEL_W : sheetOpen ? 1 : 0;
     return (
-      <>
+      <div className={`fixed inset-0 z-50 ${sheetOpen ? "" : "pointer-events-none"}`}>
+        {/* Under the burger drawer this is a bare click-catcher; the drawer's own
+            scrim dims. Standalone it's the scrim, and its dim tracks the pull. */}
+        <div
+          onClick={closeSheet}
+          style={{ opacity: scrimOpacity }}
+          className={`fixed inset-0 ${dragging ? "" : "transition-opacity duration-200 ease-out"} ${
+            sheetOpen ? "" : "pointer-events-none"
+          } ${underMenu ? "" : "bg-zinc-900/20 backdrop-blur-sm dark:bg-zinc-950/50"}`}
+        />
+        {/* Panel, always mounted so it can slide; inert while closed. */}
+        <div
+          inert={!sheetOpen}
+          style={{ translate: `${panelTx}px` }}
+          className={`absolute inset-y-0 right-0 flex w-80 max-w-[90vw] flex-col overflow-y-auto border-l border-zinc-200 bg-white px-4 font-sans text-zinc-700 shadow-2xl dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
+            dragging ? "" : "transition-transform duration-200 ease-out"
+          } ${sheetOpen ? "" : "pointer-events-none"}`}
+        >
+          <button
+            type="button"
+            onClick={closeSheet}
+            aria-label="Close"
+            className="absolute right-2 top-2 z-10 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+          >
+            <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
+          </button>
+          {/* Pet + composer sit at the bottom; the transcript grows above and
+              scrolls once it fills. */}
+          <div className="mt-auto flex w-full flex-col items-center gap-2 pb-6 pt-14">
+            {sheetInner}
+          </div>
+        </div>
+        {/* Paw handle on the panel's left edge: tap to toggle, pull left/right to
+            drag the panel out/in, drag up/down to slide it along the edge. Same
+            fill and no seam as the panel, so it reads as attached once named. */}
         {name && (
           <button
             type="button"
-            onClick={() => setSheetOpen(true)}
-            aria-label={`Open ${name}`}
-            className={`fixed right-0 top-1/2 z-40 grid h-16 w-8 -translate-y-1/2 cursor-pointer place-items-center rounded-l-full border border-r-0 border-white/50 bg-white/40 pl-1 shadow-lg ring-1 ring-black/5 backdrop-blur-md transition-opacity dark:border-white/10 dark:bg-zinc-900/40 ${
-              sheetOpen ? "pointer-events-none opacity-0" : "opacity-100"
+            onPointerDown={onPawDown}
+            onPointerMove={onPawMove}
+            onPointerUp={onPawUp}
+            onPointerCancel={onPawUp}
+            onClick={onPawClick}
+            aria-label={sheetOpen ? `Close ${name}` : `Open ${name}`}
+            style={{ top: pawY ?? "50%", translate: `${panelTx - PANEL_W}px -50%` }}
+            className={`pointer-events-auto absolute right-0 z-10 grid h-16 w-8 cursor-grab touch-none place-items-center rounded-l-full border border-r-0 border-zinc-200 bg-white pl-1 text-zinc-500 shadow-lg active:cursor-grabbing dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-400 ${
+              dragging ? "" : "transition-transform duration-200 ease-out"
             }`}
           >
             <Icon icon="mdi:paw" className="h-6 w-6 -rotate-[30deg]" aria-hidden />
           </button>
         )}
-        {/* Panel, always mounted so it can slide; inert while closed. */}
-        <div
-          className={`fixed inset-0 z-50 ${sheetOpen ? "" : "pointer-events-none"}`}
-          inert={!sheetOpen}
-        >
-          {/* Under the burger drawer this is a bare click-catcher; the drawer's
-              own scrim does the dimming. Standalone (above 950) it's the scrim. */}
-          <div
-            onClick={closeSheet}
-            className={`fixed inset-0 transition-opacity duration-200 ease-out ${
-              sheetOpen ? "opacity-100" : "opacity-0"
-            } ${underMenu ? "" : "bg-zinc-900/20 backdrop-blur-sm dark:bg-zinc-950/50"}`}
-          />
-          <div
-            className={`absolute inset-y-0 right-0 flex w-80 max-w-[90vw] flex-col overflow-y-auto border-l border-zinc-200 bg-white px-4 font-sans text-zinc-700 shadow-2xl transition-transform duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300 ${
-              sheetOpen ? "translate-x-0" : "translate-x-full"
-            }`}
-          >
-            <button
-              type="button"
-              onClick={closeSheet}
-              aria-label="Close"
-              className="absolute right-2 top-2 z-10 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
-            >
-              <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
-            </button>
-            {/* Pet + composer sit at the bottom; the transcript grows above and
-                scrolls once it fills. */}
-            <div className="mt-auto flex w-full flex-col items-center gap-2 pb-6 pt-14">
-              {sheetInner}
-            </div>
-          </div>
-        </div>
-      </>
+      </div>
     );
   }
 
