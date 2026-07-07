@@ -79,11 +79,6 @@ body {
    the `animate-page-fade-in` utility is used in template.tsx, Tailwind emits it
    and keeps the keyframes (plain authored @keyframes get tree-shaken away). */
 @theme {
-  /* Header flips from the inline links to the hamburger drawer here. Set above
-     sm because around this width the brand prompt (~$ denys.sh <page>) typing
-     out starts shoving the nav links. Drives the `nav:` variant. Tune freely. */
-  --breakpoint-nav: 950px;
-
   --animate-page-fade-in: page-fade-in 0.35s ease-out;
 
   @keyframes page-fade-in {

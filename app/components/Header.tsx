@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Icon } from "@/app/components/Icon";
 import TerminalTrigger from "./terminal/TerminalTrigger";
@@ -20,10 +20,28 @@ const navLinks = [
   // { href: "/about", label: "About" },
 ];
 
+// Widest page name the brand can type after "denys.sh". The header is sized to
+// fit it, so navigating to a longer page never wraps the nav. Derived from the
+// links, not a guessed px breakpoint.
+const LONGEST_ARG = navLinks.reduce((a, l) => {
+  const slug = l.href.slice(1);
+  return slug.length > a.length ? slug : a;
+}, "");
+
+// Measure before paint so the collapse decision doesn't flash on load.
+const useIsoLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [petName, setPetName] = useState("");
   const petDocked = usePetDocked();
+  // Inline nav wraps -> show the burger instead. Starts collapsed so a narrow
+  // first paint doesn't flash the full nav; the measure below corrects it.
+  const [collapsed, setCollapsed] = useState(true);
+  const rowRef = useRef<HTMLDivElement>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const brandFitRef = useRef<HTMLSpanElement>(null);
 
   // Read the pet's stored name as the drawer opens, to label the Pet entry.
   function openMenu() {
@@ -34,11 +52,11 @@ export default function Header() {
 
   function openPet() {
     const w = window.innerWidth;
-    // 640-950: keep this drawer open behind the pet. Its scrim is the single
-    // darkening the pet slides in over, so nothing stacks. Elsewhere (the nav's
-    // Pet entry above 950, or the mobile bottom sheet) the pet brings its own
-    // scrim, so the drawer can leave now.
-    const underMenu = w >= 640 && w < 950;
+    // From the burger drawer above the phone width: keep it open behind the pet
+    // so its scrim is the single darkening the pet slides in over (nothing
+    // stacks). From the inline nav's Pet entry, or the phone bottom sheet, the
+    // pet brings its own scrim so the drawer can leave now.
+    const underMenu = collapsed && w >= 640;
     window.dispatchEvent(new CustomEvent("pet:open", { detail: { underMenu } }));
     if (!underMenu) setMenuOpen(false);
   }
@@ -70,9 +88,34 @@ export default function Header() {
     };
   }, [menuOpen]);
 
+  // Collapse to the burger exactly when the inline nav, carrying the widest
+  // brand text, would no longer fit on one row. Measured (not a fixed px) so it
+  // tracks the real link widths and the Pet entry coming and going.
+  useIsoLayoutEffect(() => {
+    const row = rowRef.current;
+    const nav = navRef.current;
+    const brand = brandFitRef.current;
+    if (!row || !nav || !brand) return;
+    const measure = () => {
+      const cs = getComputedStyle(row);
+      const pad = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const gap = parseFloat(cs.columnGap) || 16;
+      // 16px slack so it flips a touch before the actual wrap.
+      const need = brand.offsetWidth + gap + nav.scrollWidth + 16;
+      setCollapsed(need > row.clientWidth - pad);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(row);
+    return () => ro.disconnect();
+  }, [petDocked]);
+
   return (
     <header>
-      <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-2">
+      <div
+        ref={rowRef}
+        className="relative mx-auto flex max-w-5xl items-center justify-between gap-4 overflow-hidden px-6 py-2"
+      >
         {/* Brand is denys.sh as a runnable script: clicking runs it bare (home);
             BrandPrompt types the current page in as the script's argument. */}
         <Link
@@ -81,7 +124,23 @@ export default function Header() {
         >
           <BrandPrompt />
         </Link>
-        <nav className="hidden flex-wrap justify-end gap-x-4 gap-y-1 text-xl text-zinc-600 nav:flex dark:text-zinc-400">
+        {/* Widest brand the prompt can show, styled to match. Out of flow and
+            hidden; only its width feeds the collapse measure above. */}
+        <span
+          ref={brandFitRef}
+          aria-hidden
+          className="pointer-events-none invisible absolute left-6 top-0 inline-flex items-baseline whitespace-nowrap text-2xl font-semibold tracking-tight"
+        >
+          <span>~&nbsp;$&nbsp;</span>denys.sh
+          <span>{" " + LONGEST_ARG}</span>
+          <span className="ml-1 inline-block h-[1.05em] w-[0.55em]" />
+        </span>
+        <nav
+          ref={navRef}
+          className={`flex flex-nowrap justify-end gap-x-4 whitespace-nowrap text-xl text-zinc-600 dark:text-zinc-400 ${
+            collapsed ? "pointer-events-none invisible absolute left-6" : ""
+          }`}
+        >
           {navLinks.map((link) => (
             <Link
               key={link.href}
@@ -98,7 +157,7 @@ export default function Header() {
             <button
               type="button"
               onClick={openPet}
-              className="flex items-center gap-1.5 hover:text-black dark:hover:text-white"
+              className="flex cursor-pointer items-center gap-1.5 hover:text-black dark:hover:text-white"
             >
               Pet
               <Icon icon="mdi:paw" className="h-5 w-5 -rotate-[30deg]" aria-hidden />
@@ -106,21 +165,23 @@ export default function Header() {
           )}
           <ThemeToggle />
         </nav>
-        <button
-          type="button"
-          onClick={openMenu}
-          aria-label="Open menu"
-          aria-expanded={menuOpen}
-          className="-mr-2 shrink-0 p-2 text-zinc-600 nav:hidden dark:text-zinc-400"
-        >
-          <Icon icon="mdi:menu" className="h-7 w-7" aria-hidden />
-        </button>
+        {collapsed && (
+          <button
+            type="button"
+            onClick={openMenu}
+            aria-label="Open menu"
+            aria-expanded={menuOpen}
+            className="-mr-2 shrink-0 p-2 text-zinc-600 dark:text-zinc-400"
+          >
+            <Icon icon="mdi:menu" className="h-7 w-7" aria-hidden />
+          </button>
+        )}
       </div>
 
       {/* Drawer, always mounted so it can slide; inert while closed so its
           links can't be tabbed to. */}
       <div
-        className={`fixed inset-0 z-50 nav:hidden ${menuOpen ? "" : "pointer-events-none"}`}
+        className={`fixed inset-0 z-50 ${collapsed ? "" : "hidden"} ${menuOpen ? "" : "pointer-events-none"}`}
         inert={!menuOpen}
       >
         <div
@@ -172,7 +233,7 @@ export default function Header() {
                 e.stopPropagation();
                 openPet();
               }}
-              className="flex items-center gap-1.5 py-2 hover:text-black dark:hover:text-white"
+              className="flex cursor-pointer items-center gap-1.5 py-2 hover:text-black dark:hover:text-white"
             >
               Pet
               <Icon icon="mdi:paw" className="h-5 w-5 -rotate-[30deg]" aria-hidden />
