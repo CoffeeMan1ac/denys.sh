@@ -24,7 +24,7 @@ import { DENYS_FACTS, pageNote } from "@/lib/pet/knowledge";
 
 export const runtime = "nodejs";
 
-const MODEL = "llama-3.1-8b-instant"; // small + fast; the pet needs to reply quickly
+const MODEL = "openai/gpt-oss-20b"; // llama-3.1-8b-instant was retired by Groq; this stays fast at low reasoning effort
 const MAX_INPUT = 280; // chars per message
 const MAX_MESSAGES = 6; // how many past messages we keep as context
 const MAX_OUTPUT_TOKENS = 160; // keep replies short; also caps cost
@@ -206,6 +206,9 @@ export async function POST(req: Request) {
       temperature: 0.8,
       abortSignal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
       onError: ({ error }) => console.error("pet stream error:", error),
+      // gpt-oss is a reasoning model; keep effort low so the token budget
+      // goes to the reply, not hidden chain-of-thought.
+      providerOptions: { groq: { reasoningEffort: "low" } },
     });
     return result.toTextStreamResponse();
   } catch (err) {
