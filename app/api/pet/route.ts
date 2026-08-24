@@ -24,7 +24,7 @@ import { DENYS_FACTS, pageNote } from "@/lib/pet/knowledge";
 
 export const runtime = "nodejs";
 
-const MODEL = "openai/gpt-oss-20b"; // llama-3.1-8b-instant was retired by Groq; this stays fast at low reasoning effort
+const MODEL = "openai/gpt-oss-120b"; // llama-3.1-8b-instant was retired by Groq; warmer tone than 20b at the same latency
 const MAX_INPUT = 280; // chars per message
 const MAX_MESSAGES = 6; // how many past messages we keep as context
 const MAX_OUTPUT_TOKENS = 160; // keep replies short; also caps cost
