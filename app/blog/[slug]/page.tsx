@@ -6,6 +6,10 @@ import { SITE_URL, FULL_NAME, absoluteUrl } from "@/lib/site";
 
 type Params = { slug: string };
 
+// Unknown slugs 404 instead of rendering on demand: an on-demand render would
+// cache HTML carrying one request's CSP nonce (see proxy.ts).
+export const dynamicParams = false;
+
 export function generateStaticParams(): Params[] {
   return getAllPosts().map((post) => ({ slug: post.slug }));
 }
