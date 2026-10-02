@@ -538,7 +538,7 @@ export default function CornerPet() {
         type="button"
         onClick={() => setNaming(true)}
         style={{ left: PET_GUTTER_CENTER, transform: `translate(-50%, -${lift}px)` }}
-        className="fixed bottom-4 z-40 cursor-pointer whitespace-nowrap text-2xl text-zinc-500 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
+        className="fixed bottom-4 z-40 cursor-pointer whitespace-nowrap text-2xl text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-800 dark:hover:text-zinc-200"
       >
         {[...lead].map((ch, i) => (
           <span key={i} className={i === snake ? glow : undefined}>
@@ -616,7 +616,7 @@ export default function CornerPet() {
             {isMobile ? "[done]" : "[Enter]"}
           </button>
         ) : (
-          <span className="text-zinc-400">
+          <span className="text-zinc-500 dark:text-zinc-400">
             (min {nameRemaining} character{nameRemaining === 1 ? "" : "s"})
           </span>
         )}
@@ -664,7 +664,7 @@ export default function CornerPet() {
     >
       {pet.transcript().map((m, i) => (
         <p key={i} className={i ? "mt-1.5" : ""}>
-          <span className={m.role === "user" ? "text-zinc-400" : "text-zinc-500"}>
+          <span className={m.role === "user" ? "text-zinc-500 dark:text-zinc-400" : "text-zinc-500 dark:text-zinc-400"}>
             {m.role === "user" ? "you" : name}:{" "}
           </span>
           <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
@@ -674,7 +674,7 @@ export default function CornerPet() {
       ))}
       {liveRow && (
         <p className={turns ? "mt-1.5" : ""}>
-          <span className="text-zinc-500">{name}: </span>
+          <span className="text-zinc-500 dark:text-zinc-400">{name}: </span>
           <span className="whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">
             {bubbleText}
           </span>
@@ -776,7 +776,7 @@ export default function CornerPet() {
           onClick={() => setShowLog((v) => !v)}
           aria-label={showLog ? "Hide conversation" : "Show conversation"}
           aria-expanded={showLog}
-          className="absolute left-full ml-1 shrink-0 scale-x-150 text-2xl leading-none text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
+          className="absolute left-full ml-1 shrink-0 scale-x-150 text-2xl leading-none text-zinc-500 dark:text-zinc-400 transition-colors hover:text-zinc-700 dark:hover:text-zinc-300"
         >
           {showLog ? "▾" : "▴"}
         </button>
@@ -801,7 +801,7 @@ export default function CornerPet() {
       <div className={`h-6 whitespace-pre text-center text-base ${face.bubble?.tone ?? ""}`}>
         {face.bubble?.text ?? ""}
       </div>
-      {name && <div className="mb-0.5 text-xl text-zinc-500">{name}</div>}
+      {name && <div className="mb-0.5 text-xl text-zinc-500 dark:text-zinc-400">{name}</div>}
       {breathe && <div className="h-1" aria-hidden />}
       <div className="whitespace-pre">{face.ears}</div>
       {/* Tag sits to the left (inward) so it doesn't run off-screen. */}
@@ -914,7 +914,7 @@ export default function CornerPet() {
                 type="button"
                 onClick={closeSheet}
                 aria-label="Close"
-                className="absolute right-2 top-2 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+                className="absolute right-2 top-2 p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
               >
                 <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
               </button>
@@ -958,7 +958,7 @@ export default function CornerPet() {
             type="button"
             onClick={closeSheet}
             aria-label="Close"
-            className="absolute right-2 top-2 z-10 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            className="absolute right-2 top-2 z-10 p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
           >
             <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
           </button>

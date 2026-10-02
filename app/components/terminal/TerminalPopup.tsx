@@ -141,18 +141,18 @@ export default function TerminalPopup() {
             type="button"
             onClick={exit}
             aria-label="Exit terminal"
-            className="font-mono text-xs text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+            className="font-mono text-xs text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
           >
             exit
           </button>
-          <span className="font-mono text-xs text-zinc-500">
+          <span className="font-mono text-xs text-zinc-500 dark:text-zinc-400">
             guest@denys.sh — terminal
           </span>
           <button
             type="button"
             onClick={close}
             aria-label="Close terminal"
-            className="-mr-1 p-1 text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200"
+            className="-mr-1 p-1 text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200"
           >
             <Icon icon="mdi:close" className="h-5 w-5" aria-hidden />
           </button>
@@ -224,49 +224,55 @@ function TitleBar({
       onPointerUp={onPointerUp}
       className="flex cursor-move touch-none select-none items-center gap-2 border-b border-zinc-200 bg-zinc-100 px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <div className="flex items-center gap-1.5">
+      <div className="-m-1.5 flex items-center">
         <button
           type="button"
           onClick={onExit}
           aria-label="Exit terminal"
-          className="group grid h-3 w-3 place-items-center rounded-full bg-red-400 hover:bg-red-500"
+          className="group grid h-6 w-6 place-items-center"
         >
-          <Icon
-            icon="mdi:close"
-            className="h-2 w-2 text-red-900/0 group-hover:text-red-900/70"
-            aria-hidden
-          />
+          <span className="grid h-3 w-3 place-items-center rounded-full bg-red-400 group-hover:bg-red-500">
+            <Icon
+              icon="mdi:close"
+              className="h-2 w-2 text-red-900/0 group-hover:text-red-900/70"
+              aria-hidden
+            />
+          </span>
         </button>
         <button
           type="button"
           onClick={onClose}
           aria-label="Close terminal"
-          className="group grid h-3 w-3 place-items-center rounded-full bg-amber-300 hover:bg-amber-400"
+          className="group grid h-6 w-6 place-items-center"
         >
-          <Icon
-            icon="mdi:minus"
-            className="h-2 w-2 text-amber-900/0 group-hover:text-amber-900/70"
-            aria-hidden
-          />
+          <span className="grid h-3 w-3 place-items-center rounded-full bg-amber-300 group-hover:bg-amber-400">
+            <Icon
+              icon="mdi:minus"
+              className="h-2 w-2 text-amber-900/0 group-hover:text-amber-900/70"
+              aria-hidden
+            />
+          </span>
         </button>
         <button
           type="button"
           onClick={onMaximize}
           aria-label="Open fullscreen terminal"
-          className="group grid h-3 w-3 place-items-center rounded-full bg-emerald-300 hover:bg-emerald-400"
+          className="group grid h-6 w-6 place-items-center"
         >
-          <Icon
-            icon="mdi:arrow-expand"
-            className="h-2 w-2 text-emerald-900/0 group-hover:text-emerald-900/70"
-            aria-hidden
-          />
+          <span className="grid h-3 w-3 place-items-center rounded-full bg-emerald-300 group-hover:bg-emerald-400">
+            <Icon
+              icon="mdi:arrow-expand"
+              className="h-2 w-2 text-emerald-900/0 group-hover:text-emerald-900/70"
+              aria-hidden
+            />
+          </span>
         </button>
       </div>
-      <span className="flex-1 text-center font-mono text-xs text-zinc-500">
+      <span className="flex-1 text-center font-mono text-xs text-zinc-600 dark:text-zinc-400">
         guest@denys.sh — terminal
       </span>
       {/* Spacer balancing the traffic lights so the title stays centered. */}
-      <span className="w-[52px]" aria-hidden />
+      <span className="w-[64px]" aria-hidden />
     </div>
   );
 }

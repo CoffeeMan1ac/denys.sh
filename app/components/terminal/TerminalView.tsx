@@ -16,9 +16,9 @@ function Prompt({ path }: { path: string }) {
   return (
     <span className="shrink-0 whitespace-pre">
       <span className="text-emerald-700 dark:text-emerald-400">guest@denys.sh</span>
-      <span className="text-zinc-400">:</span>
+      <span className="text-zinc-500 dark:text-zinc-400">:</span>
       <span className="text-sky-700 dark:text-sky-400">{path}</span>
-      <span className="text-zinc-400">$ </span>
+      <span className="text-zinc-500 dark:text-zinc-400">$ </span>
     </span>
   );
 }
@@ -205,7 +205,7 @@ export default function TerminalView() {
             className="min-h-[1.625em] whitespace-pre-wrap break-words"
           >
             <span>{input}</span>
-            <span className="text-zinc-400">{ghost}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{ghost}</span>
             {"​"}
           </div>
           <textarea

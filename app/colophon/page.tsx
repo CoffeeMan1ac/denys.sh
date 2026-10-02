@@ -56,7 +56,7 @@ export default function ColophonPage() {
       <h1 className="text-3xl font-semibold tracking-tight">Colophon</h1>
 
       <section className="mt-8">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Built with
         </h2>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
@@ -71,7 +71,7 @@ export default function ColophonPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Nitty-gritty, SEO, etc.
         </h2>
         <ul className="mt-4 space-y-3 text-zinc-600 dark:text-zinc-400">
@@ -95,7 +95,7 @@ export default function ColophonPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Inspiration
         </h2>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">
@@ -113,7 +113,7 @@ export default function ColophonPage() {
       </section>
 
       <section className="mt-10">
-        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-400">
+        <h2 className="text-sm font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
           Other versions
         </h2>
         <p className="mt-2 text-zinc-600 dark:text-zinc-400">

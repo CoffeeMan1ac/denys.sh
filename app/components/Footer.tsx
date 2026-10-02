@@ -24,7 +24,7 @@ const linkColor: Record<string, string> = {
 export default function Footer() {
   return (
     <footer id="site-footer" className="border-t border-zinc-200 dark:border-zinc-800">
-      <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 py-6 text-sm text-zinc-500 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mx-auto flex max-w-5xl flex-col items-center gap-3 px-6 py-6 text-sm text-zinc-500 dark:text-zinc-400 sm:flex-row sm:items-center sm:justify-between">
         {/* Two lines on phones, one on sm+ (the middle dot bridges them). */}
         <span className="flex flex-col items-center gap-1 sm:flex-row sm:gap-0">
           <span>
@@ -48,11 +48,11 @@ export default function Footer() {
             const className = `group transition-colors ${linkColor[link.label]}`;
             const inner = (
               <>
-                <span className="text-zinc-400 transition-colors group-hover:text-current group-active:text-current">
+                <span className="text-zinc-500 dark:text-zinc-400 transition-colors group-hover:text-current group-active:text-current">
                   [
                 </span>
                 {link.label}
-                <span className="text-zinc-400 transition-colors group-hover:text-current group-active:text-current">
+                <span className="text-zinc-500 dark:text-zinc-400 transition-colors group-hover:text-current group-active:text-current">
                   ]
                 </span>
               </>

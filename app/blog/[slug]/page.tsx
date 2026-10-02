@@ -71,7 +71,7 @@ export default async function PostPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <p className="text-sm text-zinc-500">{post.date}</p>
+      <p className="text-sm text-zinc-500 dark:text-zinc-400">{post.date}</p>
       <MDXRemote source={post.content} />
     </article>
   );

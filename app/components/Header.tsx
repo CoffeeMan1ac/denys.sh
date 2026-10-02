@@ -136,6 +136,7 @@ export default function Header() {
           <span className="ml-1 inline-block h-[1.05em] w-[0.55em]" />
         </span>
         <nav
+          aria-label="Main"
           ref={navRef}
           className={`flex flex-nowrap justify-end gap-x-4 whitespace-nowrap text-xl text-zinc-600 dark:text-zinc-400 ${
             collapsed ? "pointer-events-none invisible absolute left-6" : ""
@@ -204,12 +205,13 @@ export default function Header() {
             type="button"
             onClick={() => setMenuOpen(false)}
             aria-label="Close menu"
-            className="absolute right-2 top-2 z-10 p-1.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
+            className="absolute right-2 top-2 z-10 p-1.5 text-zinc-500 dark:text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300"
           >
             <Icon icon="mdi:close" className="h-6 w-6" aria-hidden />
           </button>
           {/* Any click in here (a link, the terminal) also closes the drawer. */}
           <nav
+            aria-label="Menu"
             onClick={() => setMenuOpen(false)}
             className="flex flex-col items-start gap-1 px-6 pt-14 text-xl text-zinc-600 dark:text-zinc-400"
           >
@@ -237,7 +239,7 @@ export default function Header() {
             >
               Pet
               <Icon icon="mdi:paw" className="h-5 w-5 -rotate-[30deg]" aria-hidden />
-              {!petName && <span className="text-zinc-400">(name it!)</span>}
+              {!petName && <span className="text-zinc-500 dark:text-zinc-400">(name it!)</span>}
             </button>
             {/* Hidden.
             <span className="py-2">

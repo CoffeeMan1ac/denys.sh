@@ -26,7 +26,7 @@ export default function GlassDock() {
           href={item.href}
           aria-label={item.label}
           title={item.label}
-          className="rounded-full p-1.5 text-zinc-500 transition hover:bg-white/60 hover:text-black"
+          className="rounded-full p-1.5 text-zinc-500 dark:text-zinc-400 transition hover:bg-white/60 hover:text-black"
         >
           <Icon icon={item.icon} className="h-5 w-5" aria-hidden />
         </Link>

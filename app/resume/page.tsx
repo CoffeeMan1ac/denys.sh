@@ -160,7 +160,7 @@ function Section({
 }) {
   return (
     <section className="mt-10">
-      <h2 className="border-b border-zinc-200 pb-1 dark:border-zinc-800 text-xs font-semibold uppercase tracking-widest text-zinc-400">
+      <h2 className="border-b border-zinc-200 pb-1 dark:border-zinc-800 text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
         {title}
       </h2>
       <div className="mt-4 space-y-6">{children}</div>
@@ -187,7 +187,7 @@ function EntryBlock({ entry }: { entry: Entry }) {
           )}
         </h3>
         {entry.date && (
-          <span className="shrink-0 text-sm text-zinc-500">{entry.date}</span>
+          <span className="shrink-0 text-sm text-zinc-500 dark:text-zinc-400">{entry.date}</span>
         )}
       </div>
       {(entry.subtitle || entry.meta) && (
@@ -196,7 +196,7 @@ function EntryBlock({ entry }: { entry: Entry }) {
             <p className="text-sm italic text-zinc-600 dark:text-zinc-400">{entry.subtitle}</p>
           )}
           {entry.meta && (
-            <span className="shrink-0 text-sm text-zinc-500">{entry.meta}</span>
+            <span className="shrink-0 text-sm text-zinc-500 dark:text-zinc-400">{entry.meta}</span>
           )}
         </div>
       )}

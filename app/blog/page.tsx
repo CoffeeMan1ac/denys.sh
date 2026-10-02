@@ -24,7 +24,7 @@ export default function BlogPage() {
             >
               {post.title}
             </Link>
-            <p className="text-sm text-zinc-500">{post.date}</p>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">{post.date}</p>
             <p className="mt-1 text-zinc-600 dark:text-zinc-400">{post.summary}</p>
           </li>
         ))}

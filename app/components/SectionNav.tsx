@@ -8,7 +8,7 @@ const sections = [
 
 export default function SectionNav() {
   return (
-    <nav className="grid gap-3 sm:grid-cols-3">
+    <nav aria-label="Sections" className="grid gap-3 sm:grid-cols-3">
       {sections.map((section) => (
         <Link
           key={section.href}
@@ -18,7 +18,7 @@ export default function SectionNav() {
           <span className="text-3xl font-medium text-zinc-700 underline-offset-4 group-hover:text-black group-hover:underline sm:text-4xl dark:text-zinc-300 dark:group-hover:text-white">
             {section.label}
           </span>
-          <span className="mt-1 text-lg text-zinc-500 sm:text-xl">{section.blurb}</span>
+          <span className="mt-1 text-lg text-zinc-500 dark:text-zinc-400 sm:text-xl">{section.blurb}</span>
         </Link>
       ))}
     </nav>
@@ -66,7 +66,7 @@ function FolderNav() {
               <span className="text-4xl font-medium text-zinc-700 underline-offset-4 group-hover:text-black group-hover:underline">
                 {section.label}
               </span>
-              <span className="mt-1 text-xl text-zinc-500">{section.blurb}</span>
+              <span className="mt-1 text-xl text-zinc-500 dark:text-zinc-400">{section.blurb}</span>
             </div>
           </div>
         </Link>

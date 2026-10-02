@@ -20,7 +20,7 @@ export default function TerminalTrigger({
         onClick={open}
         aria-label="Terminal (Ctrl+`)"
         title="Terminal (Ctrl+`)"
-        className="cursor-pointer rounded-full p-1.5 text-zinc-500 transition hover:bg-white/60 hover:text-black"
+        className="cursor-pointer rounded-full p-1.5 text-zinc-500 dark:text-zinc-400 transition hover:bg-white/60 hover:text-black"
       >
         <Icon icon="mdi:console-line" className="h-5 w-5" aria-hidden />
       </button>

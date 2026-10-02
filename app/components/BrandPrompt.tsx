@@ -82,7 +82,7 @@ export default function BrandPrompt() {
 
   return (
     <span className="inline-flex items-baseline">
-      <span className="text-zinc-400">~&nbsp;$&nbsp;</span>
+      <span className="text-zinc-500 dark:text-zinc-400">~&nbsp;$&nbsp;</span>
       {bare ? (
         // Home/unknown: denys.sh types itself out.
         <span>{typed}</span>
@@ -91,7 +91,7 @@ export default function BrandPrompt() {
         <>
           denys.sh
           {typed && (
-            <span className="text-zinc-500">{" " + typed}</span>
+            <span className="text-zinc-500 dark:text-zinc-400">{" " + typed}</span>
           )}
         </>
       )}

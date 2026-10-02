@@ -68,7 +68,7 @@ function GhostCover({
         </span>
       </div>
       <span
-        className={`absolute bottom-0 left-0 m-4 ${labelSize} font-medium uppercase tracking-widest text-zinc-500`}
+        className={`absolute bottom-0 left-0 m-4 ${labelSize} font-medium uppercase tracking-widest text-zinc-500 dark:text-zinc-400`}
       >
         {label}
       </span>
@@ -89,7 +89,7 @@ export function ShowcaseLayout({ items }: { items: WorkItem[] }) {
           className="group relative flex flex-col transition-transform duration-200 hover:-translate-y-1 active:translate-y-0"
         >
           {/* Arrow: slides further out and darkens on hover. */}
-          <span className="absolute right-3 top-3 z-10 text-zinc-500 transition-all duration-200 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-black dark:group-hover:text-white">
+          <span className="absolute right-3 top-3 z-10 text-zinc-500 dark:text-zinc-400 transition-all duration-200 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:text-black dark:group-hover:text-white">
             <Icon icon="mdi:arrow-top-right" className="h-5 w-5" aria-hidden />
           </span>
           {item.video ? (
@@ -119,14 +119,14 @@ export function ShowcaseLayout({ items }: { items: WorkItem[] }) {
             <GhostCover index={i} label={item.language ?? "Project"} labelSize="text-sm" />
           )}
           {item.period && (
-            <p className="mt-4 text-xs font-medium uppercase tracking-widest text-zinc-400">
+            <p className="mt-4 text-xs font-medium uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
               {item.period}
             </p>
           )}
-          <h3 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900 underline-offset-4 group-hover:underline dark:text-zinc-100">
+          <h2 className="mt-1 text-xl font-semibold tracking-tight text-zinc-900 underline-offset-4 group-hover:underline dark:text-zinc-100">
             {item.title}
-          </h3>
-          {item.role && <p className="mt-1 text-sm text-zinc-500">{item.role}</p>}
+          </h2>
+          {item.role && <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">{item.role}</p>}
           <p className="mt-2 flex-1 text-zinc-600 dark:text-zinc-400">{item.description}</p>
           {item.tags && (
             <div className="mt-3 flex flex-wrap gap-1.5">
@@ -148,26 +148,26 @@ function ProjectCardBody({ item }: { item: WorkItem }) {
       {(item.featured || item.archived) && (
         <div className="mb-1 flex items-center gap-2">
           {item.featured && (
-            <span className="text-xs font-medium uppercase tracking-widest text-zinc-400">
+            <span className="text-xs font-medium uppercase tracking-widest text-zinc-500 dark:text-zinc-400">
               Featured
             </span>
           )}
           {item.archived && (
-            <span className="rounded border border-zinc-200 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-400 dark:border-zinc-800">
+            <span className="rounded border border-zinc-200 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-500 dark:text-zinc-400 dark:border-zinc-800">
               Archived
             </span>
           )}
         </div>
       )}
 
-      <h3 className="text-lg font-semibold text-zinc-900 underline-offset-4 group-hover:underline dark:text-zinc-100">
+      <h2 className="text-lg font-semibold text-zinc-900 underline-offset-4 group-hover:underline dark:text-zinc-100">
         {item.title}
-      </h3>
+      </h2>
       <p className="mt-1 flex-1 text-base text-zinc-600 dark:text-zinc-400">{item.description}</p>
 
       {/* Stats footer, pinned to the bottom so cards align. Kept on one line
          (no wrap) so it never spills onto a second row. */}
-      <div className="mt-4 flex flex-nowrap items-center gap-x-4 overflow-hidden text-base text-zinc-500">
+      <div className="mt-4 flex flex-nowrap items-center gap-x-4 overflow-hidden text-base text-zinc-500 dark:text-zinc-400">
         {item.stars != null && (
           <span className="inline-flex items-center gap-1 whitespace-nowrap" title="Stars">
             <Icon icon="mdi:star-outline" className="h-4 w-4" aria-hidden />
@@ -212,14 +212,14 @@ export function ProjectsLayout({ items }: { items: WorkItem[] }) {
 // Writing: reverse-chronological list grouped by year.
 export function WritingLayout({ items }: { items: WorkItem[] }) {
   if (items.length === 0) {
-    return <p className="text-sm text-zinc-500">Nothing here yet — soon.</p>;
+    return <p className="text-sm text-zinc-500 dark:text-zinc-400">Nothing here yet — soon.</p>;
   }
   return (
     <ol className="space-y-9">
       {items.map((item) => (
         <li key={item.title} className="flex gap-4 sm:gap-5">
           {/* Year rail */}
-          <div className="w-12 shrink-0 pt-0.5 text-right text-sm tabular-nums text-zinc-400 sm:w-14">
+          <div className="w-12 shrink-0 pt-0.5 text-right text-sm tabular-nums text-zinc-500 dark:text-zinc-400 sm:w-14">
             {item.year && <span className="sr-only">Year: </span>}
             {item.year}
           </div>
@@ -228,7 +228,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
             {(item.kind || item.status) && (
               <div className="mb-1.5 flex flex-wrap items-center gap-2">
                 {item.kind && (
-                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-500 dark:bg-zinc-800">
+                  <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-zinc-600 dark:text-zinc-400 dark:bg-zinc-800">
                     {item.kind}
                   </span>
                 )}
@@ -240,7 +240,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
               </div>
             )}
 
-            <h3 className="font-semibold leading-snug text-zinc-900 dark:text-zinc-100">
+            <h2 className="font-semibold leading-snug text-zinc-900 dark:text-zinc-100">
               {item.href ? (
                 <a
                   href={item.href}
@@ -253,7 +253,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
               ) : (
                 item.title
               )}
-            </h3>
+            </h2>
 
             {item.authors && (
               <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
@@ -262,7 +262,7 @@ export function WritingLayout({ items }: { items: WorkItem[] }) {
             )}
 
             {item.venue && (
-              <p className="mt-0.5 text-sm italic text-zinc-500">{item.venue}</p>
+              <p className="mt-0.5 text-sm italic text-zinc-500 dark:text-zinc-400">{item.venue}</p>
             )}
 
             <p className="mt-2 max-w-2xl text-sm text-zinc-600 dark:text-zinc-400">{item.description}</p>

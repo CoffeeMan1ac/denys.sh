@@ -22,7 +22,7 @@ export default function LocalTime() {
   }, []);
 
   return (
-    <span suppressHydrationWarning className="text-sm text-zinc-500">
+    <span suppressHydrationWarning className="text-sm text-zinc-500 dark:text-zinc-400">
       Dublin {time}
     </span>
   );
